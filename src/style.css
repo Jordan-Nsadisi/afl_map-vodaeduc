@@ -31,6 +31,23 @@
   --font:        'Inter', system-ui, sans-serif;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #111827;
+    --c-surface: #1f2937;
+    --c-surface-hover: #374151;
+    --c-text: #f9fafb;
+    --c-text-sub: #9ca3af;
+    --c-border: #374151;
+    --c-primary: #00A36C;
+    --c-primary-d: #00875A;
+    --c-primary-l: rgba(0, 163, 108, 0.15);
+    --c-danger: #ef4444;
+    --c-danger-l: rgba(239, 68, 68, 0.15);
+    --c-accent: #3b82f6;
+  }
+}
+
 /* ── Reset ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -709,8 +726,8 @@ html, body {
 .toast--warn    { background: #FF8B00; }
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: none; opacity: 1; } }
 
-/* ── Responsive Mobile ───────────────────────────────────── */
-@media (max-width: 768px) {
+/* ── Responsive Tablet & Mobile ────────────────────────────── */
+@media (max-width: 1024px) {
   #sidebar {
     position: absolute; top: 0; left: 0; height: 100%;
     transform: translateX(-100%);
@@ -721,13 +738,15 @@ html, body {
 
   .topbar-btn   { display: flex; }
   .topbar-brand { display: flex; }
-  #topbar { top: 10px; left: 10px; right: 10px; justify-content: space-between; }
+  #topbar { display: flex; top: 10px; left: 10px; right: 10px; justify-content: space-between; }
+}
 
+@media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
   .modal-panel { max-height: 95vh; }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   #btn-close-sidebar { display: none; }
   #topbar { display: none; }
 }
