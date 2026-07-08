@@ -368,6 +368,20 @@ html, body {
 .icon-btn--light:hover { background: var(--c-border); }
 .icon-btn svg { width: 16px; height: 16px; }
 
+/* ── LEAFLET Custom Controls ───────────────────────────────── */
+.map-locate-btn {
+  background-color: var(--c-surface);
+  width: 32px; height: 32px;
+  border: 1px solid var(--c-border) !important;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-text);
+  transition: all var(--trans);
+}
+.map-locate-btn:hover { background-color: var(--c-bg); color: var(--c-primary); }
+.map-locate-btn svg { width: 18px; height: 18px; }
+
 /* ── LEAFLET Popup custom ────────────────────────────────── */
 .leaflet-popup-content-wrapper {
   border-radius: var(--radius-md) !important;
