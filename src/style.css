@@ -282,7 +282,7 @@ body {
 }
 
 .count-number {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--c-primary);
 }
