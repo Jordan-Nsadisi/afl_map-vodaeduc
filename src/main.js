@@ -324,6 +324,15 @@ function buildPopupHtml(s) {
         <p class="popup-stocks-title">Contraceptifs disponibles</p>
         ${s.stocks.map(st => `<div class="popup-stock-item ${st.type === 'clinique' ? 'popup-stock-item--clinical' : ''}">${escHtml(st.name)}</div>`).join('')}
        </div>`
+    : (s.offre_contraception ? 
+       `<div class="popup-stocks"><span class="popup-tag popup-tag--warning">Stock non renseigné</span></div>` 
+       : '')
+
+  const orientationHtml = s.orientation_rupture_stocks && s.orientation_rupture_stocks.toLowerCase() !== 'aucune' && s.orientation_rupture_stocks.toLowerCase() !== 'non'
+    ? `<div class="popup-orientation">
+         <strong>En cas de rupture :</strong> ${escHtml(s.orientation_rupture_stocks)}
+         ${s.adresse_struct_orientation ? `<br><small>${escHtml(s.adresse_struct_orientation)}</small>` : ''}
+       </div>`
     : ''
 
   const indicators = [
@@ -332,8 +341,15 @@ function buildPopupHtml(s) {
     s.offre_contraception      && 'Contraception',
   ].filter(Boolean)
 
+  const coverHtml = s.cover_url 
+    ? `<div class="popup-cover" style="background-image: url('${escHtml(s.cover_url)}')"></div>`
+    : `<div class="popup-cover popup-cover--fallback" data-type="${typeConf ? typeConf.markerClass : 'marker-icon--default'}"></div>`
+
+  const routeUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}`
+
   return `
     <div class="popup-card">
+      ${coverHtml}
       <div class="popup-header">
         <span class="popup-type-badge">${typeIcon} ${escHtml(s.structure_type)}${detailLabel}</span>
         <p class="popup-name">${escHtml(s.name)}</p>
@@ -341,10 +357,17 @@ function buildPopupHtml(s) {
       </div>
       <div class="popup-body">
         ${cityLabel ? `<div class="popup-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg><span>${cityLabel}${s.adresse_structure ? ' – ' + escHtml(s.adresse_structure) : ''}</span></div>` : ''}
-        ${s.contact_tel_structure ? `<div class="popup-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>${escHtml(s.contact_tel_structure)}</span></div>` : ''}
+        ${s.contact_tel_structure ? `<div class="popup-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span><a href="tel:${escHtml(s.contact_tel_structure)}">${escHtml(s.contact_tel_structure)}</a></span></div>` : ''}
         ${indicators.length ? `<div class="popup-indicators">${indicators.map(i => `<span class="popup-indicator">${i}</span>`).join('')}</div>` : ''}
       </div>
       ${stocksHtml}
+      ${orientationHtml}
+      <div class="popup-actions">
+        <a href="${routeUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary btn-sm">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg> Itinéraire
+        </a>
+        ${s.contact_tel_structure ? `<a href="tel:${escHtml(s.contact_tel_structure)}" class="btn-secondary btn-sm"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Appeler</a>` : ''}
+      </div>
     </div>`
 }
 
