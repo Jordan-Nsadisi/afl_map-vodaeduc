@@ -12,6 +12,20 @@ import 'leaflet.markercluster'
 // ── CONFIG ──────────────────────────────────────────────────────
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
 
+// Monitoring basique des erreurs globales
+window.onerror = function (message, source, lineno, colno, error) {
+  console.error('[PNSA Error Monitoring]', { message, source, lineno, colno, error });
+  // S'assurer que le DOM est prêt avant d'afficher un toast
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    if (typeof showToast === 'function') {
+      showToast('Une erreur inattendue est survenue.', 'error');
+    }
+  }
+};
+window.addEventListener('unhandledrejection', function (event) {
+  console.error('[PNSA Unhandled Rejection]', event.reason);
+});
+
 const STRUCTURE_TYPES = [
   { label: 'Pharmacie',                  key: 'Pharmacie',                 icon: '💊', markerClass: 'marker-icon--pharmacie' },
   { label: 'Établissement de soin',      key: 'Établissement de soin',     icon: '🏥', markerClass: 'marker-icon--soins'     },
@@ -308,7 +322,7 @@ function renderMarkers() {
     })
 
     const marker = L.marker([s.latitude, s.longitude], { icon })
-      .bindPopup(buildPopupHtml(s), { maxWidth: 270 })
+      .bindPopup(() => buildPopupHtml(s), { maxWidth: 270 })
 
     marker.addTo(markersLayer)
   })
@@ -577,12 +591,16 @@ function bindUIEvents() {
     field.hidden = e.target.value !== 'Établissement de soin'
   })
 
-  // Admin search
+  // Admin search debounce
+  let searchTimeout;
   document.getElementById('admin-search')?.addEventListener('input', e => {
-    const q = e.target.value.toLowerCase()
-    document.querySelectorAll('.admin-list-item').forEach(item => {
-      item.hidden = !item.dataset.name.toLowerCase().includes(q)
-    })
+    clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+      const q = e.target.value.toLowerCase()
+      document.querySelectorAll('.admin-list-item').forEach(item => {
+        item.hidden = !item.dataset.name.toLowerCase().includes(q)
+      })
+    }, 300)
   })
 
   // Confirm modal
@@ -596,15 +614,20 @@ function bindUIEvents() {
 // ── ADMIN MODAL ───────────────────────────────────────────────────
 function openAdminModal() {
   if (!isAdminAuthenticated) {
-    document.getElementById('pin-modal').hidden = false
+    const pinModal = document.getElementById('pin-modal')
+    pinModal.hidden = false
+    document.getElementById('admin-pin').focus()
   } else {
-    document.getElementById('admin-modal').hidden = false
+    const adminModal = document.getElementById('admin-modal')
+    adminModal.hidden = false
     renderAdminList()
+    adminModal.querySelector('button, input').focus()
   }
 }
 function closeAdminModal() {
   document.getElementById('admin-modal').hidden = true
   resetForm()
+  document.getElementById('btn-open-admin')?.focus()
 }
 
 function renderAdminList() {
@@ -621,10 +644,10 @@ function renderAdminList() {
           <p class="admin-item-meta">${escHtml(capitalize(s.city))} ${s.health_zone ? '– ' + capitalize(s.health_zone.replace(/_/g,' ')) : ''}</p>
         </div>
         <div class="admin-item-actions">
-          <button class="btn-icon-sm btn-icon-sm--edit" data-action="edit" data-id="${s.id}" title="Modifier">
+          <button class="btn-icon-sm btn-icon-sm--edit" data-action="edit" data-id="${s.id}" title="Modifier" aria-label="Modifier la structure">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="btn-icon-sm btn-icon-sm--del" data-action="delete" data-id="${s.id}" title="Supprimer">
+          <button class="btn-icon-sm btn-icon-sm--del" data-action="delete" data-id="${s.id}" title="Supprimer" aria-label="Supprimer la structure">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
@@ -852,3 +875,30 @@ function getDemoData() {
     { id:5, name:'TEST', precision_adresse_structure:false, contact_tel_structure:'840546250', latitude:-4.3357678, longitude:15.2699245, gps_precision:3, cover_url:null, adresse_structure:'OK', integration_ssaaj:false, espace_jeune_fonctionnel:false, offre_contraception:false, integration_pf_pharmacie:false, orientation_rupture_stocks:'Non', adresse_struct_orientation:'', structure_type:'Centre de jeunes', health_zone:'binza_meteo', city:'kinshasa', healthcare_detail:null, stocks:[] },
   ]
 }
+
+// ── UTILS / A11Y ──────────────────────────────────────────────────
+function trapFocus(modal) {
+  const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  if(!focusable.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  
+  modal.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !modal.hidden) {
+      if (e.shiftKey) { // shift + tab
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else { // tab
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    if (e.key === 'Escape' && !modal.hidden) {
+      const closeBtn = modal.querySelector('.icon-btn--light')
+      if (closeBtn) closeBtn.click()
+    }
+  })
+}
+
+// Appliquer trapFocus sur les modales existantes
+trapFocus(document.getElementById('pin-modal'))
+trapFocus(document.getElementById('admin-modal'))
+trapFocus(document.getElementById('confirm-modal'))
