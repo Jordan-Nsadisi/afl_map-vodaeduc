@@ -27,21 +27,21 @@ window.addEventListener('unhandledrejection', function (event) {
 });
 
 const STRUCTURE_TYPES = [
-  { label: 'Pharmacie',                  key: 'Pharmacie',                 icon: '💊', markerClass: 'marker-icon--pharmacie' },
-  { label: 'Établissement de soin',      key: 'Établissement de soin',     icon: '🏥', markerClass: 'marker-icon--soins'     },
+  { label: 'Pharmacie', key: 'Pharmacie', icon: '💊', markerClass: 'marker-icon--pharmacie' },
+  { label: 'Établissement de soin', key: 'Établissement de soin', icon: '🏥', markerClass: 'marker-icon--soins' },
   { label: "Centre d'Écoute et Conseil", key: "Centre d'Écoute et de Conseil", icon: '🫂', markerClass: 'marker-icon--ecoute' },
-  { label: 'Centre de jeunes',           key: 'Centre de jeunes',          icon: '👥', markerClass: 'marker-icon--jeunes'   },
+  { label: 'Centre de jeunes', key: 'Centre de jeunes', icon: '👥', markerClass: 'marker-icon--jeunes' },
 ]
 
 const CONTRACEPTIVE_SLUGS = [
-  { slug: 'presartif_masc', name: 'Préservatifs masculins'                },
-  { slug: 'presartif_fem',  name: 'Préservatifs féminins'                 },
-  { slug: 'coc',            name: 'Pilules Orales Combinées'              },
-  { slug: 'injectable',     name: 'Contraceptif injectable'               },
-  { slug: 'implant',        name: 'Implant'                               },
-  { slug: 'diu',            name: 'DIU (Stérilet)'                        },
-  { slug: 'patch',          name: 'Patch contraceptif'                    },
-  { slug: 'coc_urgence',    name: 'Pilule du lendemain'                   },
+  { slug: 'presartif_masc', name: 'Préservatifs masculins' },
+  { slug: 'presartif_fem', name: 'Préservatifs féminins' },
+  { slug: 'coc', name: 'Pilules Orales Combinées' },
+  { slug: 'injectable', name: 'Contraceptif injectable' },
+  { slug: 'implant', name: 'Implant' },
+  { slug: 'diu', name: 'DIU (Stérilet)' },
+  { slug: 'patch', name: 'Patch contraceptif' },
+  { slug: 'coc_urgence', name: 'Pilule du lendemain' },
 ]
 
 const HEALTHCARE_DETAIL_LABELS = { cs: 'Centre de Santé', hgr: 'Hôpital Général de Référence' }
@@ -70,24 +70,24 @@ let userMarker = null
 
 function initMap() {
   map = L.map('map', { zoomControl: true }).setView([-4.322, 15.322], 12)
-  
+
   const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
     maxZoom: 19,
   })
-  
+
   const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'Tiles &copy; Esri',
     maxZoom: 19,
   })
 
   osm.addTo(map)
-  
+
   baseMaps = {
     "Plan (OSM)": osm,
     "Satellite": satellite
   }
-  
+
   L.control.layers(baseMaps).addTo(map)
 
   // Utilisation de MarkerClusterGroup
@@ -97,14 +97,14 @@ function initMap() {
     zoomToBoundsOnClick: true,
     maxClusterRadius: 50
   }).addTo(map)
-  
+
   // Contrôle custom Géolocalisation
-  const locateControl = L.control({position: 'topleft'})
-  locateControl.onAdd = function() {
+  const locateControl = L.control({ position: 'topleft' })
+  locateControl.onAdd = function () {
     const btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom map-locate-btn')
     btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'
     btn.title = 'Me localiser'
-    btn.onclick = function(e) {
+    btn.onclick = function (e) {
       e.stopPropagation()
       locateUser()
     }
@@ -118,13 +118,13 @@ function locateUser() {
     showToast("La géolocalisation n'est pas supportée par votre navigateur.", "error")
     return
   }
-  
+
   showToast("Recherche de votre position...", "success")
-  
+
   navigator.geolocation.getCurrentPosition(position => {
     const lat = position.coords.latitude
     const lng = position.coords.longitude
-    
+
     if (userMarker) {
       userMarker.setLatLng([lat, lng])
     } else {
@@ -248,7 +248,7 @@ function populateSelectFilters() {
 
   const currentZone = zoneSelect.value
   zoneSelect.innerHTML = '<option value="">Toutes les zones</option>'
-  
+
   let validStructures = allStructures
   if (selectedCity) {
     validStructures = allStructures.filter(s => (s.city || '').toLowerCase() === selectedCity)
@@ -270,22 +270,22 @@ function populateSelectFilters() {
 
 // ── FILTERS ───────────────────────────────────────────────────────
 function applyFilters() {
-  const city           = document.getElementById('filter-city').value.toLowerCase()
-  const zone           = document.getElementById('filter-zone').value
-  const checkedTypes   = [...document.querySelectorAll('.type-filter:checked')].map(el => el.value)
-  const checkedHc      = [...document.querySelectorAll('.hc-detail-filter:checked')].map(el => el.value)
-  const checkedStocks  = [...document.querySelectorAll('.stock-filter:checked')].map(el => el.value)
-  const checkedFeats   = [...document.querySelectorAll('.feature-filter:checked')].map(el => el.value)
+  const city = document.getElementById('filter-city').value.toLowerCase()
+  const zone = document.getElementById('filter-zone').value
+  const checkedTypes = [...document.querySelectorAll('.type-filter:checked')].map(el => el.value)
+  const checkedHc = [...document.querySelectorAll('.hc-detail-filter:checked')].map(el => el.value)
+  const checkedStocks = [...document.querySelectorAll('.stock-filter:checked')].map(el => el.value)
+  const checkedFeats = [...document.querySelectorAll('.feature-filter:checked')].map(el => el.value)
 
   filteredStructures = allStructures.filter(s => {
     if (city && (s.city || '').toLowerCase() !== city) return false
     if (zone && (s.health_zone || '').trim() !== zone) return false
-    if (checkedTypes.length  && !checkedTypes.includes(s.structure_type)) return false
+    if (checkedTypes.length && !checkedTypes.includes(s.structure_type)) return false
     if (checkedTypes.includes('Établissement de soin') && s.structure_type === 'Établissement de soin' && checkedHc.length) {
       if (!checkedHc.includes(s.healthcare_detail)) return false
     }
     if (checkedStocks.length && !checkedStocks.every(slug => (s.stocks || []).some(st => st.slug === slug))) return false
-    if (checkedFeats.length  && !checkedFeats.every(f => !!s[f])) return false
+    if (checkedFeats.length && !checkedFeats.every(f => !!s[f])) return false
     return true
   })
 
@@ -294,7 +294,7 @@ function applyFilters() {
   toggleNoResults()
   updateActiveFiltersBadge()
   saveFilters()
-  
+
   // Ajustement automatique de la vue (Fit Bounds)
   if (filteredStructures.length > 0) {
     const bounds = markersLayer.getBounds()
@@ -332,17 +332,17 @@ function buildPopupHtml(s) {
   const typeConf = STRUCTURE_TYPES.find(t => t.key === s.structure_type)
   const typeIcon = typeConf ? typeConf.icon : '📍'
   const detailLabel = s.healthcare_detail ? ` – ${HEALTHCARE_DETAIL_LABELS[s.healthcare_detail] || s.healthcare_detail}` : ''
-  const zoneLabel   = s.health_zone ? capitalize(s.health_zone.replace(/_/g, ' ')) : ''
-  const cityLabel   = s.city ? capitalize(s.city) : ''
+  const zoneLabel = s.health_zone ? capitalize(s.health_zone.replace(/_/g, ' ')) : ''
+  const cityLabel = s.city ? capitalize(s.city) : ''
 
   const stocksHtml = s.stocks && s.stocks.length
     ? `<div class="popup-stocks">
         <p class="popup-stocks-title">Contraceptifs disponibles</p>
         ${s.stocks.map(st => `<div class="popup-stock-item ${st.type === 'clinique' ? 'popup-stock-item--clinical' : ''}">${escHtml(st.name)}</div>`).join('')}
        </div>`
-    : (s.offre_contraception ? 
-       `<div class="popup-stocks"><span class="popup-tag popup-tag--warning">Stock non renseigné</span></div>` 
-       : '')
+    : (s.offre_contraception ?
+      `<div class="popup-stocks"><span class="popup-tag popup-tag--warning">Stock non renseigné</span></div>`
+      : '')
 
   const orientationHtml = s.orientation_rupture_stocks && s.orientation_rupture_stocks.toLowerCase() !== 'aucune' && s.orientation_rupture_stocks.toLowerCase() !== 'non'
     ? `<div class="popup-orientation">
@@ -352,16 +352,17 @@ function buildPopupHtml(s) {
     : ''
 
   const indicators = [
-    s.integration_ssaaj        && 'SSAAJ',
+    s.integration_ssaaj && 'SSAAJ',
     s.espace_jeune_fonctionnel && 'Espace Jeune',
-    s.offre_contraception      && 'Contraception',
+    s.offre_contraception && 'Contraception',
   ].filter(Boolean)
 
-  const coverHtml = s.cover_url 
+  const coverHtml = s.cover_url
     ? `<div class="popup-cover" style="background-image: url('${escHtml(s.cover_url)}')"></div>`
     : `<div class="popup-cover popup-cover--fallback" data-type="${typeConf ? typeConf.markerClass : 'marker-icon--default'}"></div>`
 
   const routeUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}`
+  const geoUrl = `geo:${s.latitude},${s.longitude}?q=${s.latitude},${s.longitude}(${encodeURIComponent(s.name)})`;
 
   return `
     <div class="popup-card">
@@ -379,7 +380,7 @@ function buildPopupHtml(s) {
       ${stocksHtml}
       ${orientationHtml}
       <div class="popup-actions">
-        <a href="${routeUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary btn-sm">
+        <a href="${geoUrl}" class="btn-primary btn-sm">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg> Itinéraire
         </a>
         ${s.contact_tel_structure ? `<a href="tel:${escHtml(s.contact_tel_structure)}" class="btn-secondary btn-sm"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Appeler</a>` : ''}
@@ -415,11 +416,11 @@ function updateActiveFiltersBadge() {
   const city = document.getElementById('filter-city').value
   const zone = document.getElementById('filter-zone').value
   const checkedInputs = document.querySelectorAll('.type-filter:checked, .stock-filter:checked, .feature-filter:checked, .hc-detail-filter:checked')
-  
+
   let count = checkedInputs.length
   if (city) count++
   if (zone) count++
-  
+
   const badge = document.getElementById('active-filters-badge')
   if (badge) {
     badge.textContent = count
@@ -442,35 +443,35 @@ function saveFilters() {
 function restoreFilters() {
   const stored = sessionStorage.getItem('pnsa_filters')
   if (!stored) return
-  
+
   try {
     const filters = JSON.parse(stored)
-    
+
     document.getElementById('filter-city').value = filters.city || ''
     populateSelectFilters()
     document.getElementById('filter-zone').value = filters.zone || ''
-    
+
     filters.types.forEach(val => {
       const cb = document.querySelector(`.type-filter[value="${val}"]`)
       if (cb) cb.checked = true
     })
-    
+
     const hcCheckbox = document.querySelector('.type-filter[value="Établissement de soin"]')
     if (hcCheckbox && hcCheckbox.checked) {
       const sub = document.getElementById('subfilter-healthcare')
       if (sub) sub.style.display = 'block'
     }
-    
+
     filters.hc.forEach(val => {
       const cb = document.querySelector(`.hc-detail-filter[value="${val}"]`)
       if (cb) cb.checked = true
     })
-    
+
     filters.stocks.forEach(val => {
       const cb = document.querySelector(`.stock-filter[value="${val}"]`)
       if (cb) cb.checked = true
     })
-    
+
     filters.features.forEach(val => {
       const cb = document.querySelector(`.feature-filter[value="${val}"]`)
       if (cb) cb.checked = true
@@ -484,18 +485,18 @@ function resetFilters() {
   document.getElementById('filter-city').value = ''
   populateSelectFilters()
   document.getElementById('filter-zone').value = ''
-  
+
   document.querySelectorAll('.type-filter, .stock-filter, .feature-filter, .hc-detail-filter').forEach(el => { el.checked = false })
-  
+
   const sub = document.getElementById('subfilter-healthcare')
   if (sub) sub.style.display = 'none'
-  
+
   applyFilters()
 }
 
 function escHtml(str) {
   if (!str) return ''
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 function capitalize(str) {
@@ -511,7 +512,7 @@ function bindUIEvents() {
     applyFilters()
   })
   document.getElementById('filter-zone').addEventListener('change', applyFilters)
-  
+
   document.addEventListener('change', e => {
     if (e.target.matches('.type-filter[value="Établissement de soin"]')) {
       const sub = document.getElementById('subfilter-healthcare')
@@ -543,8 +544,9 @@ function bindUIEvents() {
 
   // Admin modal & PIN
   document.getElementById('btn-open-admin')?.addEventListener('click', openAdminModal)
+  document.getElementById('btn-open-admin-pc')?.addEventListener('click', openAdminModal)
   document.getElementById('btn-close-admin')?.addEventListener('click', closeAdminModal)
-  
+
   document.getElementById('pin-form')?.addEventListener('submit', e => {
     e.preventDefault()
     const pin = document.getElementById('admin-pin').value
@@ -559,7 +561,7 @@ function bindUIEvents() {
       document.getElementById('pin-error').hidden = false
     }
   })
-  
+
   document.getElementById('btn-close-pin')?.addEventListener('click', () => {
     document.getElementById('pin-modal').hidden = true
     document.getElementById('admin-pin').value = ''
@@ -641,7 +643,7 @@ function renderAdminList() {
         <span class="admin-item-icon">${typeConf ? typeConf.icon : '📍'}</span>
         <div class="admin-item-info">
           <p class="admin-item-name">${escHtml(s.name)}</p>
-          <p class="admin-item-meta">${escHtml(capitalize(s.city))} ${s.health_zone ? '– ' + capitalize(s.health_zone.replace(/_/g,' ')) : ''}</p>
+          <p class="admin-item-meta">${escHtml(capitalize(s.city))} ${s.health_zone ? '– ' + capitalize(s.health_zone.replace(/_/g, ' ')) : ''}</p>
         </div>
         <div class="admin-item-actions">
           <button class="btn-icon-sm btn-icon-sm--edit" data-action="edit" data-id="${s.id}" title="Modifier" aria-label="Modifier la structure">
@@ -657,7 +659,7 @@ function renderAdminList() {
   // Délégation d'événements
   list.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (btn.dataset.action === 'edit')   openEditForm(parseInt(btn.dataset.id))
+      if (btn.dataset.action === 'edit') openEditForm(parseInt(btn.dataset.id))
       if (btn.dataset.action === 'delete') openConfirmDelete(parseInt(btn.dataset.id))
     })
   })
@@ -672,23 +674,23 @@ function openEditForm(id) {
   document.getElementById('btn-submit-label').textContent = 'Mettre à jour'
 
   // Remplissage des champs
-  document.getElementById('form-id').value                   = s.id
-  document.getElementById('form-name').value                 = s.name || ''
-  document.getElementById('form-type').value                 = s.structure_type || ''
-  document.getElementById('form-city').value                 = s.city || ''
-  document.getElementById('form-zone').value                 = s.health_zone || ''
-  document.getElementById('form-adresse').value              = s.adresse_structure || ''
-  document.getElementById('form-contact').value              = s.contact_tel_structure || ''
-  document.getElementById('form-lat').value                  = s.latitude || ''
-  document.getElementById('form-lng').value                  = s.longitude || ''
-  document.getElementById('form-gps-precision').value        = s.gps_precision || ''
-  document.getElementById('form-orientation').value          = s.orientation_rupture_stocks || ''
-  document.getElementById('form-adresse-orientation').value  = s.adresse_struct_orientation || ''
-  document.getElementById('form-ssaaj').checked              = !!s.integration_ssaaj
-  document.getElementById('form-espace-jeune').checked       = !!s.espace_jeune_fonctionnel
-  document.getElementById('form-offre-contraception').checked= !!s.offre_contraception
-  document.getElementById('form-integration-pf').checked     = !!s.integration_pf_pharmacie
-  document.getElementById('form-precision-adresse').checked  = !!s.precision_adresse_structure
+  document.getElementById('form-id').value = s.id
+  document.getElementById('form-name').value = s.name || ''
+  document.getElementById('form-type').value = s.structure_type || ''
+  document.getElementById('form-city').value = s.city || ''
+  document.getElementById('form-zone').value = s.health_zone || ''
+  document.getElementById('form-adresse').value = s.adresse_structure || ''
+  document.getElementById('form-contact').value = s.contact_tel_structure || ''
+  document.getElementById('form-lat').value = s.latitude || ''
+  document.getElementById('form-lng').value = s.longitude || ''
+  document.getElementById('form-gps-precision').value = s.gps_precision || ''
+  document.getElementById('form-orientation').value = s.orientation_rupture_stocks || ''
+  document.getElementById('form-adresse-orientation').value = s.adresse_struct_orientation || ''
+  document.getElementById('form-ssaaj').checked = !!s.integration_ssaaj
+  document.getElementById('form-espace-jeune').checked = !!s.espace_jeune_fonctionnel
+  document.getElementById('form-offre-contraception').checked = !!s.offre_contraception
+  document.getElementById('form-integration-pf').checked = !!s.integration_pf_pharmacie
+  document.getElementById('form-precision-adresse').checked = !!s.precision_adresse_structure
 
   const hdField = document.getElementById('field-healthcare-detail')
   hdField.hidden = s.structure_type !== 'Établissement de soin'
@@ -720,7 +722,7 @@ function resetForm() {
 async function handleFormSubmit(e) {
   e.preventDefault()
   const form = e.target
-  
+
   // Custom Validation
   let isValid = true
   form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'))
@@ -728,15 +730,15 @@ async function handleFormSubmit(e) {
 
   const name = document.getElementById('form-name').value
   if (!name.trim()) { isValid = false; document.getElementById('form-name').classList.add('is-invalid') }
-  
+
   const type = document.getElementById('form-type').value
   if (!type) { isValid = false; document.getElementById('form-type').classList.add('is-invalid') }
-  
+
   const latStr = document.getElementById('form-lat').value
   const lngStr = document.getElementById('form-lng').value
   const lat = parseFloat(latStr)
   const lng = parseFloat(lngStr)
-  
+
   if (isNaN(lat) || lat < -15 || lat > 6) { // RDC rough bounds
     isValid = false;
     document.getElementById('form-lat').classList.add('is-invalid')
@@ -762,23 +764,23 @@ async function handleFormSubmit(e) {
       slug: s.slug, name: s.name,
       type: form.querySelector(`.stock-type-select[data-slug="${s.slug}"]`)?.value || 'communautaire'
     }))
-    
+
   fd.append('stocks', JSON.stringify(stocks))
 
-  // Booleans
-  ;['integration_ssaaj','espace_jeune_fonctionnel','offre_contraception','integration_pf_pharmacie','precision_adresse_structure']
-    .forEach(k => {
-      if (form.querySelector(`[name="${k}"]`)?.checked) {
-        fd.set(k, '1')
-      } else {
-        fd.append(k, '0') // Ensure it exists
-      }
-    })
+    // Booleans
+    ;['integration_ssaaj', 'espace_jeune_fonctionnel', 'offre_contraception', 'integration_pf_pharmacie', 'precision_adresse_structure']
+      .forEach(k => {
+        if (form.querySelector(`[name="${k}"]`)?.checked) {
+          fd.set(k, '1')
+        } else {
+          fd.append(k, '0') // Ensure it exists
+        }
+      })
 
   try {
     const method = 'POST'
-    const url    = editingId ? `${API_URL}?id=${editingId}&_method=PUT` : API_URL
-    const res    = await fetch(url, { method, body: fd })
+    const url = editingId ? `${API_URL}?id=${editingId}&_method=PUT` : API_URL
+    const res = await fetch(url, { method, body: fd })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     showToast(editingId ? 'Structure mise à jour ✓' : 'Structure ajoutée ✓', 'success')
     await loadStructures()
@@ -796,10 +798,10 @@ function exportCSV() {
     showToast("Aucune donnée à exporter.", "warn")
     return
   }
-  
+
   const headers = ['id', 'name', 'structure_type', 'city', 'health_zone', 'latitude', 'longitude', 'contact_tel_structure', 'adresse_structure']
   let csvContent = headers.join(',') + '\n'
-  
+
   allStructures.forEach(s => {
     const row = headers.map(h => {
       let val = s[h] || ''
@@ -808,7 +810,7 @@ function exportCSV() {
     })
     csvContent += row.join(',') + '\n'
   })
-  
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
@@ -825,14 +827,14 @@ function startGpsSelection() {
   document.getElementById('admin-modal').hidden = true
   document.querySelector('.leaflet-container').classList.add('crosshair-cursor-enabled')
   showToast("Cliquez sur la carte pour définir l'emplacement", "warn")
-  
+
   map.once('click', e => {
     isSelectingGps = false
     document.querySelector('.leaflet-container').classList.remove('crosshair-cursor-enabled')
     document.getElementById('form-lat').value = e.latlng.lat.toFixed(6)
     document.getElementById('form-lng').value = e.latlng.lng.toFixed(6)
     document.getElementById('admin-modal').hidden = false
-    
+
     // Supprimer les classes d'erreur s'il y en a
     document.getElementById('form-lat').classList.remove('is-invalid')
     document.getElementById('form-lng').classList.remove('is-invalid')
@@ -870,19 +872,19 @@ async function confirmDelete() {
 // ── DEMO DATA (fallback si API indisponible) ──────────────────────
 function getDemoData() {
   return [
-    { id:4, name:'CEICA', precision_adresse_structure:false, contact_tel_structure:'813542456', latitude:-4.3359148, longitude:15.2698697, gps_precision:5, cover_url:null, adresse_structure:'Nzanza', integration_ssaaj:true, espace_jeune_fonctionnel:false, offre_contraception:true, integration_pf_pharmacie:false, orientation_rupture_stocks:'Centre des jeunes', adresse_struct_orientation:'', structure_type:"Centre d'Écoute et de Conseil", health_zone:'', city:'boma', healthcare_detail:null, stocks:[{slug:'presartif_masc',name:'Préservatifs masculins',type:'communautaire'},{slug:'presartif_fem',name:'Préservatifs féminins',type:'communautaire'}] },
-    { id:3, name:'Hosto', precision_adresse_structure:true, contact_tel_structure:'82555', latitude:-4.3359797, longitude:15.2699612, gps_precision:4, cover_url:null, adresse_structure:'Limete 16e', integration_ssaaj:true, espace_jeune_fonctionnel:true, offre_contraception:true, integration_pf_pharmacie:false, orientation_rupture_stocks:'Aucune', adresse_struct_orientation:'Mmmmm', structure_type:'Établissement de soin', health_zone:'limete', city:'kinshasa', healthcare_detail:'cs', stocks:[{slug:'coc',name:'Pilules Orales Combinées (Pilule classique)',type:'communautaire'},{slug:'injectable',name:'Contraceptif injectable classique',type:'clinique'}] },
-    { id:5, name:'TEST', precision_adresse_structure:false, contact_tel_structure:'840546250', latitude:-4.3357678, longitude:15.2699245, gps_precision:3, cover_url:null, adresse_structure:'OK', integration_ssaaj:false, espace_jeune_fonctionnel:false, offre_contraception:false, integration_pf_pharmacie:false, orientation_rupture_stocks:'Non', adresse_struct_orientation:'', structure_type:'Centre de jeunes', health_zone:'binza_meteo', city:'kinshasa', healthcare_detail:null, stocks:[] },
+    { id: 4, name: 'CEICA', precision_adresse_structure: false, contact_tel_structure: '813542456', latitude: -4.3359148, longitude: 15.2698697, gps_precision: 5, cover_url: null, adresse_structure: 'Nzanza', integration_ssaaj: true, espace_jeune_fonctionnel: false, offre_contraception: true, integration_pf_pharmacie: false, orientation_rupture_stocks: 'Centre des jeunes', adresse_struct_orientation: '', structure_type: "Centre d'Écoute et de Conseil", health_zone: '', city: 'boma', healthcare_detail: null, stocks: [{ slug: 'presartif_masc', name: 'Préservatifs masculins', type: 'communautaire' }, { slug: 'presartif_fem', name: 'Préservatifs féminins', type: 'communautaire' }] },
+    { id: 3, name: 'Hosto', precision_adresse_structure: true, contact_tel_structure: '82555', latitude: -4.3359797, longitude: 15.2699612, gps_precision: 4, cover_url: null, adresse_structure: 'Limete 16e', integration_ssaaj: true, espace_jeune_fonctionnel: true, offre_contraception: true, integration_pf_pharmacie: false, orientation_rupture_stocks: 'Aucune', adresse_struct_orientation: 'Mmmmm', structure_type: 'Établissement de soin', health_zone: 'limete', city: 'kinshasa', healthcare_detail: 'cs', stocks: [{ slug: 'coc', name: 'Pilules Orales Combinées (Pilule classique)', type: 'communautaire' }, { slug: 'injectable', name: 'Contraceptif injectable classique', type: 'clinique' }] },
+    { id: 5, name: 'TEST', precision_adresse_structure: false, contact_tel_structure: '840546250', latitude: -4.3357678, longitude: 15.2699245, gps_precision: 3, cover_url: null, adresse_structure: 'OK', integration_ssaaj: false, espace_jeune_fonctionnel: false, offre_contraception: false, integration_pf_pharmacie: false, orientation_rupture_stocks: 'Non', adresse_struct_orientation: '', structure_type: 'Centre de jeunes', health_zone: 'binza_meteo', city: 'kinshasa', healthcare_detail: null, stocks: [] },
   ]
 }
 
 // ── UTILS / A11Y ──────────────────────────────────────────────────
 function trapFocus(modal) {
   const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
-  if(!focusable.length) return
+  if (!focusable.length) return
   const first = focusable[0]
   const last = focusable[focusable.length - 1]
-  
+
   modal.addEventListener('keydown', e => {
     if (e.key === 'Tab' && !modal.hidden) {
       if (e.shiftKey) { // shift + tab
