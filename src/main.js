@@ -135,6 +135,7 @@ async function loadStructures() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     allStructures = await res.json()
     populateSelectFilters()
+    restoreFilters()
     applyFilters()
   } catch (err) {
     console.error('Erreur API:', err)
@@ -142,6 +143,7 @@ async function loadStructures() {
     // Données de démonstration
     allStructures = getDemoData()
     populateSelectFilters()
+    restoreFilters()
     applyFilters()
   } finally {
     showLoader(false)
@@ -152,14 +154,33 @@ async function loadStructures() {
 function buildFilterCheckboxes() {
   // Types de structures
   const typeList = document.getElementById('filter-type-list')
-  typeList.innerHTML = STRUCTURE_TYPES.map(t => `
-    <li class="checkbox-item">
-      <label class="checkbox-label">
-        <input type="checkbox" class="type-filter" value="${escHtml(t.key)}" />
-        <span class="checkmark"></span>
-        ${t.icon} ${escHtml(t.label)}
-      </label>
-    </li>`).join('')
+  typeList.innerHTML = STRUCTURE_TYPES.map(t => {
+    let extra = '';
+    if (t.key === 'Établissement de soin') {
+      extra = `
+        <div id="subfilter-healthcare" class="subfilter-container" style="display: none; padding-left: 28px; margin-top: 6px;">
+          <label class="checkbox-label" style="font-size: 11px;">
+            <input type="checkbox" class="hc-detail-filter" value="cs" />
+            <span class="checkmark" style="width:14px; height:14px;"></span>
+            Centre de Santé (CS)
+          </label>
+          <label class="checkbox-label" style="font-size: 11px; margin-top: 4px;">
+            <input type="checkbox" class="hc-detail-filter" value="hgr" />
+            <span class="checkmark" style="width:14px; height:14px;"></span>
+            Hôpital Général (HGR)
+          </label>
+        </div>`;
+    }
+    return `
+      <li class="checkbox-item">
+        <label class="checkbox-label">
+          <input type="checkbox" class="type-filter" value="${escHtml(t.key)}" />
+          <span class="checkmark"></span>
+          ${t.icon} ${escHtml(t.label)}
+        </label>
+        ${extra}
+      </li>`;
+  }).join('')
 
   // Méthodes contraceptives
   const stockList = document.getElementById('filter-stock-list')
@@ -196,23 +217,39 @@ function buildFilterCheckboxes() {
 }
 
 function populateSelectFilters() {
-  const cities = [...new Set(allStructures.map(s => s.city).filter(Boolean).map(c => c.toLowerCase()))]
-  const zones  = [...new Set(allStructures.map(s => s.health_zone).filter(z => z && z.trim() !== ''))]
-
   const citySelect = document.getElementById('filter-city')
   const zoneSelect = document.getElementById('filter-zone')
+  const selectedCity = citySelect.value.toLowerCase()
 
-  cities.sort().forEach(c => {
-    const opt = document.createElement('option')
-    opt.value = c; opt.textContent = capitalize(c)
-    citySelect.appendChild(opt)
-  })
+  if (citySelect.options.length <= 1) {
+    const cities = [...new Set(allStructures.map(s => s.city).filter(Boolean).map(c => c.toLowerCase()))]
+    cities.sort().forEach(c => {
+      const opt = document.createElement('option')
+      opt.value = c; opt.textContent = capitalize(c)
+      citySelect.appendChild(opt)
+    })
+  }
 
+  const currentZone = zoneSelect.value
+  zoneSelect.innerHTML = '<option value="">Toutes les zones</option>'
+  
+  let validStructures = allStructures
+  if (selectedCity) {
+    validStructures = allStructures.filter(s => (s.city || '').toLowerCase() === selectedCity)
+  }
+
+  const zones = [...new Set(validStructures.map(s => s.health_zone).filter(z => z && z.trim() !== ''))]
   zones.sort().forEach(z => {
     const opt = document.createElement('option')
     opt.value = z; opt.textContent = capitalize(z.replace(/_/g, ' '))
     zoneSelect.appendChild(opt)
   })
+
+  if (zones.includes(currentZone)) {
+    zoneSelect.value = currentZone
+  } else if (selectedCity) {
+    zoneSelect.value = ""
+  }
 }
 
 // ── FILTERS ───────────────────────────────────────────────────────
@@ -220,14 +257,17 @@ function applyFilters() {
   const city           = document.getElementById('filter-city').value.toLowerCase()
   const zone           = document.getElementById('filter-zone').value
   const checkedTypes   = [...document.querySelectorAll('.type-filter:checked')].map(el => el.value)
+  const checkedHc      = [...document.querySelectorAll('.hc-detail-filter:checked')].map(el => el.value)
   const checkedStocks  = [...document.querySelectorAll('.stock-filter:checked')].map(el => el.value)
   const checkedFeats   = [...document.querySelectorAll('.feature-filter:checked')].map(el => el.value)
 
   filteredStructures = allStructures.filter(s => {
     if (city && (s.city || '').toLowerCase() !== city) return false
-    // zone peut être "" → on ignore les structures sans zone si on filtre
     if (zone && (s.health_zone || '').trim() !== zone) return false
     if (checkedTypes.length  && !checkedTypes.includes(s.structure_type)) return false
+    if (checkedTypes.includes('Établissement de soin') && s.structure_type === 'Établissement de soin' && checkedHc.length) {
+      if (!checkedHc.includes(s.healthcare_detail)) return false
+    }
     if (checkedStocks.length && !checkedStocks.every(slug => (s.stocks || []).some(st => st.slug === slug))) return false
     if (checkedFeats.length  && !checkedFeats.every(f => !!s[f])) return false
     return true
@@ -236,6 +276,8 @@ function applyFilters() {
   renderMarkers()
   updateResultCount()
   toggleNoResults()
+  updateActiveFiltersBadge()
+  saveFilters()
   
   // Ajustement automatique de la vue (Fit Bounds)
   if (filteredStructures.length > 0) {
@@ -330,10 +372,85 @@ function showToast(msg, type = 'success') {
   setTimeout(() => toast.remove(), 3500)
 }
 
+function updateActiveFiltersBadge() {
+  const city = document.getElementById('filter-city').value
+  const zone = document.getElementById('filter-zone').value
+  const checkedInputs = document.querySelectorAll('.type-filter:checked, .stock-filter:checked, .feature-filter:checked, .hc-detail-filter:checked')
+  
+  let count = checkedInputs.length
+  if (city) count++
+  if (zone) count++
+  
+  const badge = document.getElementById('active-filters-badge')
+  if (badge) {
+    badge.textContent = count
+    badge.hidden = count === 0
+  }
+}
+
+function saveFilters() {
+  const filters = {
+    city: document.getElementById('filter-city').value,
+    zone: document.getElementById('filter-zone').value,
+    types: [...document.querySelectorAll('.type-filter:checked')].map(el => el.value),
+    hc: [...document.querySelectorAll('.hc-detail-filter:checked')].map(el => el.value),
+    stocks: [...document.querySelectorAll('.stock-filter:checked')].map(el => el.value),
+    features: [...document.querySelectorAll('.feature-filter:checked')].map(el => el.value),
+  }
+  sessionStorage.setItem('pnsa_filters', JSON.stringify(filters))
+}
+
+function restoreFilters() {
+  const stored = sessionStorage.getItem('pnsa_filters')
+  if (!stored) return
+  
+  try {
+    const filters = JSON.parse(stored)
+    
+    document.getElementById('filter-city').value = filters.city || ''
+    populateSelectFilters()
+    document.getElementById('filter-zone').value = filters.zone || ''
+    
+    filters.types.forEach(val => {
+      const cb = document.querySelector(`.type-filter[value="${val}"]`)
+      if (cb) cb.checked = true
+    })
+    
+    const hcCheckbox = document.querySelector('.type-filter[value="Établissement de soin"]')
+    if (hcCheckbox && hcCheckbox.checked) {
+      const sub = document.getElementById('subfilter-healthcare')
+      if (sub) sub.style.display = 'block'
+    }
+    
+    filters.hc.forEach(val => {
+      const cb = document.querySelector(`.hc-detail-filter[value="${val}"]`)
+      if (cb) cb.checked = true
+    })
+    
+    filters.stocks.forEach(val => {
+      const cb = document.querySelector(`.stock-filter[value="${val}"]`)
+      if (cb) cb.checked = true
+    })
+    
+    filters.features.forEach(val => {
+      const cb = document.querySelector(`.feature-filter[value="${val}"]`)
+      if (cb) cb.checked = true
+    })
+  } catch (e) {
+    console.error('Erreur restauration filtres', e)
+  }
+}
+
 function resetFilters() {
   document.getElementById('filter-city').value = ''
+  populateSelectFilters()
   document.getElementById('filter-zone').value = ''
-  document.querySelectorAll('.type-filter, .stock-filter, .feature-filter').forEach(el => { el.checked = false })
+  
+  document.querySelectorAll('.type-filter, .stock-filter, .feature-filter, .hc-detail-filter').forEach(el => { el.checked = false })
+  
+  const sub = document.getElementById('subfilter-healthcare')
+  if (sub) sub.style.display = 'none'
+  
   applyFilters()
 }
 
@@ -350,10 +467,21 @@ function capitalize(str) {
 // ── BIND UI EVENTS ────────────────────────────────────────────────
 function bindUIEvents() {
   // Filtres
-  document.getElementById('filter-city').addEventListener('change', applyFilters)
+  document.getElementById('filter-city').addEventListener('change', () => {
+    populateSelectFilters()
+    applyFilters()
+  })
   document.getElementById('filter-zone').addEventListener('change', applyFilters)
+  
   document.addEventListener('change', e => {
-    if (e.target.matches('.type-filter, .stock-filter, .feature-filter')) applyFilters()
+    if (e.target.matches('.type-filter[value="Établissement de soin"]')) {
+      const sub = document.getElementById('subfilter-healthcare')
+      if (sub) {
+        sub.style.display = e.target.checked ? 'block' : 'none'
+        if (!e.target.checked) sub.querySelectorAll('input').forEach(i => i.checked = false)
+      }
+    }
+    if (e.target.matches('.type-filter, .stock-filter, .feature-filter, .hc-detail-filter')) applyFilters()
   })
 
   // Reset
