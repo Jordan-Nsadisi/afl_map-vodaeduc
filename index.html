@@ -1,441 +1,515 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <meta name="description" content="Carte interactive PNSA - Localisez les structures de santé pour jeunes en RDC : pharmacies, centres de santé, hôpitaux et centres d'écoute." />
-    <title>Vodaeduc PNSA – Cartographie des structures de santé</title>
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description"
+    content="Carte interactive PNSA - Localisez les structures de santé pour jeunes en RDC : pharmacies, centres de santé, hôpitaux et centres d'écoute." />
+  <title>Vodaeduc PNSA – Cartographie des structures de santé</title>
 
-    <!-- Google Fonts : Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
-    <!-- App CSS -->
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
-  <body>
+  <!-- Google Fonts : Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- ============================================================
+  <!-- App CSS -->
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+
+  <!-- ============================================================
          LAYOUT PRINCIPAL : Sidebar + Carte
          Occupe exactement 100vw × 100vh (contrainte iframe Moodle)
     ============================================================ -->
-    <div id="app-shell">
+  <div id="app-shell">
 
-      <!-- ── SIDEBAR : Filtres ────────────────────────────────────── -->
-      <aside id="sidebar" aria-label="Filtres de recherche">
+    <!-- ── SIDEBAR : Filtres ────────────────────────────────────── -->
+    <aside id="sidebar" aria-label="Filtres de recherche">
 
-        <!-- En-tête Sidebar -->
-        <header class="sidebar-header">
-          <div class="sidebar-logo">
-            <span class="logo-badge">PNSA</span>
-            <div class="sidebar-title-block">
-              <h1 class="sidebar-title">Vodaeduc</h1>
-              <p class="sidebar-subtitle">Carte Santé</p>
-            </div>
-          </div>
-          <!-- Bouton pour fermer la sidebar sur mobile -->
-          <button id="btn-close-sidebar" class="icon-btn" aria-label="Fermer les filtres" title="Fermer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </header>
-
-        <!-- Corps scrollable des filtres -->
-        <div class="sidebar-body">
-
-          <!-- Filtre : Ville -->
-          <section class="filter-group" aria-labelledby="filter-city-label">
-            <h2 id="filter-city-label" class="filter-label">
-              <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-              Ville
-            </h2>
-            <div class="select-wrapper">
-              <select id="filter-city" aria-label="Filtrer par ville">
-                <option value="">Toutes les villes</option>
-                <!-- Peuplé dynamiquement par main.js -->
-              </select>
-              <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </section>
-
-          <!-- Filtre : Zone de Santé -->
-          <section class="filter-group" aria-labelledby="filter-zone-label">
-            <h2 id="filter-zone-label" class="filter-label">
-              <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-              Zone de Santé
-            </h2>
-            <div class="select-wrapper">
-              <select id="filter-zone" aria-label="Filtrer par zone de santé">
-                <option value="">Toutes les zones</option>
-                <!-- Peuplé dynamiquement par main.js -->
-              </select>
-              <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </section>
-
-          <!-- Filtre : Type de structure -->
-          <section class="filter-group" aria-labelledby="filter-type-label">
-            <h2 id="filter-type-label" class="filter-label">
-              <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              Type de structure
-            </h2>
-            <ul id="filter-type-list" class="checkbox-list" role="group" aria-labelledby="filter-type-label">
-              <!-- Items injectés dynamiquement par main.js -->
-            </ul>
-          </section>
-
-          <!-- Filtre : Méthodes contraceptives -->
-          <section class="filter-group" aria-labelledby="filter-stock-label">
-            <h2 id="filter-stock-label" class="filter-label">
-              <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c-1 4.4-5 7-9 7s-8-2.6-9-7 2-8.5 6-10.5"/><path d="M16 3.5C19.3 5 21.3 8.2 21 12"/></svg>
-              Contraceptifs disponibles
-            </h2>
-            <ul id="filter-stock-list" class="checkbox-list" role="group" aria-labelledby="filter-stock-label">
-              <!-- Items injectés dynamiquement par main.js -->
-            </ul>
-          </section>
-
-          <!-- Filtre : Caractéristiques -->
-          <section class="filter-group" aria-labelledby="filter-features-label">
-            <h2 id="filter-features-label" class="filter-label">
-              <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Caractéristiques
-            </h2>
-            <ul class="checkbox-list" role="group" aria-labelledby="filter-features-label">
-              <li class="checkbox-item">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="filter-ssaaj" class="feature-filter" value="integration_ssaaj" />
-                  <span class="checkmark"></span>
-                  Intégré au SSAAJ
-                </label>
-              </li>
-              <li class="checkbox-item">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="filter-espace-jeune" class="feature-filter" value="espace_jeune_fonctionnel" />
-                  <span class="checkmark"></span>
-                  Espace Jeune fonctionnel
-                </label>
-              </li>
-              <li class="checkbox-item">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="filter-contraception" class="feature-filter" value="offre_contraception" />
-                  <span class="checkmark"></span>
-                  Offre contraception
-                </label>
-              </li>
-            </ul>
-          </section>
-
-        </div><!-- /.sidebar-body -->
-
-        <!-- Pied de la sidebar : stats + reset -->
-        <footer class="sidebar-footer">
-          <div id="results-count" class="results-count" aria-live="polite">
-            <span id="count-number" class="count-number">–</span>
-            <span class="count-label">structure(s) trouvée(s)</span>
-          </div>
-          <button id="btn-reset-filters" class="btn-reset" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            Réinitialiser
-          </button>
-        </footer>
-
-      </aside><!-- /#sidebar -->
-
-      <!-- ── ZONE PRINCIPALE : Carte + Contrôles ─────────────────── -->
-      <main id="map-container" aria-label="Carte interactive">
-
-        <!-- Barre flottante supérieure (mobile : toggle sidebar + admin) -->
-        <div id="topbar">
-          <button id="btn-open-sidebar" class="topbar-btn" aria-label="Ouvrir les filtres" title="Filtres">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            <span>Filtres</span>
-            <span id="active-filters-badge" class="filter-badge" hidden>0</span>
-          </button>
-          <div class="topbar-brand">
-            <span class="logo-badge logo-badge--sm">PNSA</span>
-          </div>
-          <button id="btn-open-admin" class="topbar-btn topbar-btn--admin" aria-label="Administration" title="Administration (accès restreint)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span class="admin-label">Admin</span>
-          </button>
-        </div>
-
-        <!-- État de chargement initial -->
-        <div id="map-loader" class="map-loader" aria-label="Chargement de la carte">
-          <div class="loader-spinner"></div>
-          <p>Chargement des données…</p>
-        </div>
-
-        <!-- Conteneur Leaflet (ne jamais styler height/width ici, géré par CSS) -->
-        <div id="map" aria-label="Carte des structures de santé"></div>
-
-        <!-- Message si aucun résultat après filtrage -->
-        <div id="no-results-overlay" class="no-results-overlay" hidden>
-          <div class="no-results-card">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            <h2>Aucune structure trouvée</h2>
-            <p>Modifiez vos filtres pour voir d'autres résultats.</p>
-            <button id="btn-reset-filters-overlay" class="btn-primary">Réinitialiser les filtres</button>
+      <!-- En-tête Sidebar -->
+      <header class="sidebar-header">
+        <div class="sidebar-logo">
+          <span class="logo-badge">PNSA</span>
+          <div class="sidebar-title-block">
+            <h1 class="sidebar-title">Vodaeduc</h1>
+            <p class="sidebar-subtitle">Carte Santé</p>
           </div>
         </div>
+        <!-- Bouton pour fermer la sidebar sur mobile -->
+        <button id="btn-close-sidebar" class="icon-btn" aria-label="Fermer les filtres" title="Fermer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </header>
 
-      </main><!-- /#map-container -->
+      <!-- Corps scrollable des filtres -->
+      <div class="sidebar-body">
 
-    </div><!-- /#app-shell -->
+        <!-- Filtre : Ville -->
+        <section class="filter-group" aria-labelledby="filter-city-label">
+          <h2 id="filter-city-label" class="filter-label">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+            Ville
+          </h2>
+          <div class="select-wrapper">
+            <select id="filter-city" aria-label="Filtrer par ville">
+              <option value="">Toutes les villes</option>
+              <!-- Peuplé dynamiquement par main.js -->
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </section>
+
+        <!-- Filtre : Zone de Santé -->
+        <section class="filter-group" aria-labelledby="filter-zone-label">
+          <h2 id="filter-zone-label" class="filter-label">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18M9 21V9" />
+            </svg>
+            Zone de Santé
+          </h2>
+          <div class="select-wrapper">
+            <select id="filter-zone" aria-label="Filtrer par zone de santé">
+              <option value="">Toutes les zones</option>
+              <!-- Peuplé dynamiquement par main.js -->
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </section>
+
+        <!-- Filtre : Type de structure -->
+        <section class="filter-group" aria-labelledby="filter-type-label">
+          <h2 id="filter-type-label" class="filter-label">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Type de structure
+          </h2>
+          <ul id="filter-type-list" class="checkbox-list" role="group" aria-labelledby="filter-type-label">
+            <!-- Items injectés dynamiquement par main.js -->
+          </ul>
+        </section>
+
+        <!-- Filtre : Méthodes contraceptives -->
+        <section class="filter-group" aria-labelledby="filter-stock-label">
+          <h2 id="filter-stock-label" class="filter-label">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4" />
+              <path d="M21 12c-1 4.4-5 7-9 7s-8-2.6-9-7 2-8.5 6-10.5" />
+              <path d="M16 3.5C19.3 5 21.3 8.2 21 12" />
+            </svg>
+            Contraceptifs disponibles
+          </h2>
+          <ul id="filter-stock-list" class="checkbox-list" role="group" aria-labelledby="filter-stock-label">
+            <!-- Items injectés dynamiquement par main.js -->
+          </ul>
+        </section>
+
+        <!-- Filtre : Caractéristiques -->
+        <section class="filter-group" aria-labelledby="filter-features-label">
+          <h2 id="filter-features-label" class="filter-label">
+            <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Caractéristiques
+          </h2>
+          <ul class="checkbox-list" role="group" aria-labelledby="filter-features-label">
+            <li class="checkbox-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-ssaaj" class="feature-filter" value="integration_ssaaj" />
+                <span class="checkmark"></span>
+                Intégré au SSAAJ
+              </label>
+            </li>
+            <li class="checkbox-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-espace-jeune" class="feature-filter"
+                  value="espace_jeune_fonctionnel" />
+                <span class="checkmark"></span>
+                Espace Jeune fonctionnel
+              </label>
+            </li>
+            <li class="checkbox-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="filter-contraception" class="feature-filter" value="offre_contraception" />
+                <span class="checkmark"></span>
+                Offre contraception
+              </label>
+            </li>
+          </ul>
+        </section>
+
+      </div><!-- /.sidebar-body -->
+
+      <!-- Pied de la sidebar : stats + reset -->
+      <footer class="sidebar-footer">
+        <div id="results-count" class="results-count" aria-live="polite">
+          <span id="count-number" class="count-number">–</span>
+          <span class="count-label">structure(s) trouvée(s)</span>
+        </div>
+        <button id="btn-reset-filters" class="btn-reset" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          Réinitialiser
+        </button>
+      </footer>
+
+    </aside><!-- /#sidebar -->
+
+    <!-- ── ZONE PRINCIPALE : Carte + Contrôles ─────────────────── -->
+    <main id="map-container" aria-label="Carte interactive">
+
+      <!-- Barre flottante supérieure (mobile : toggle sidebar + admin) -->
+      <div id="topbar">
+        <button id="btn-open-sidebar" class="topbar-btn" aria-label="Ouvrir les filtres" title="Filtres">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+          <span>Filtres</span>
+          <span id="active-filters-badge" class="filter-badge" hidden>0</span>
+        </button>
+        <div class="topbar-brand">
+          <span class="logo-badge logo-badge--sm">PNSA</span>
+        </div>
+        <button id="btn-open-admin" class="topbar-btn topbar-btn--admin" aria-label="Administration"
+          title="Administration (accès restreint)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span class="admin-label">Admin</span>
+        </button>
+      </div>
+
+      <!-- État de chargement initial -->
+      <div id="map-loader" class="map-loader" aria-label="Chargement de la carte">
+        <div class="loader-spinner"></div>
+        <p>Chargement des données…</p>
+      </div>
+
+      <!-- Conteneur Leaflet (ne jamais styler height/width ici, géré par CSS) -->
+      <div id="map" aria-label="Carte des structures de santé"></div>
+
+      <!-- Message si aucun résultat après filtrage -->
+      <div id="no-results-overlay" class="no-results-overlay" hidden>
+        <div class="no-results-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+          <h2>Aucune structure trouvée</h2>
+          <p>Modifiez vos filtres pour voir d'autres résultats.</p>
+          <button id="btn-reset-filters-overlay" class="btn-primary">Réinitialiser les filtres</button>
+        </div>
+      </div>
+
+    </main><!-- /#map-container -->
+
+  </div><!-- /#app-shell -->
 
 
-    <!-- ============================================================
+  <!-- ============================================================
          MODALE PIN ADMIN
     ============================================================ -->
-    <div id="pin-modal" class="modal-overlay modal-overlay--sm" role="dialog" aria-modal="true" aria-labelledby="pin-modal-title" hidden>
-      <div class="modal-panel modal-panel--sm">
-        <div class="modal-header">
-          <h2 id="pin-modal-title" class="modal-title">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Accès restreint
-          </h2>
-          <button id="btn-close-pin" class="icon-btn icon-btn--light" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <form id="pin-form" class="admin-form" style="padding: 24px;">
-          <div class="form-field">
-            <label for="admin-pin">Code PIN Administrateur</label>
-            <input type="password" id="admin-pin" required placeholder="Saisissez le code" />
-            <span id="pin-error" class="field-error" hidden>Code incorrect.</span>
-          </div>
-          <div class="form-actions" style="margin-top: 16px;">
-            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Valider</button>
-          </div>
-        </form>
+  <div id="pin-modal" class="modal-overlay modal-overlay--sm" role="dialog" aria-modal="true"
+    aria-labelledby="pin-modal-title" hidden>
+    <div class="modal-panel modal-panel--sm">
+      <div class="modal-header">
+        <h2 id="pin-modal-title" class="modal-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          Accès restreint
+        </h2>
+        <button id="btn-close-pin" class="icon-btn icon-btn--light" aria-label="Fermer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
+      <form id="pin-form" class="admin-form" style="padding: 24px;">
+        <div class="form-field">
+          <label for="admin-pin">Code PIN Administrateur</label>
+          <input type="password" id="admin-pin" required placeholder="Saisissez le code" />
+          <span id="pin-error" class="field-error" hidden>Code incorrect.</span>
+        </div>
+        <div class="form-actions" style="margin-top: 16px;">
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Valider</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- ============================================================
+  <!-- ============================================================
          MODALE ADMIN : Gestion CRUD (cachée par défaut)
     ============================================================ -->
-    <div id="admin-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title" hidden>
-      <div class="modal-panel">
+  <div id="admin-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title"
+    hidden>
+    <div class="modal-panel">
 
-        <!-- En-tête modale -->
-        <header class="modal-header">
-          <h2 id="admin-modal-title" class="modal-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Administration – PNSA
-          </h2>
-          <button id="btn-close-admin" class="icon-btn icon-btn--light" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </header>
+      <!-- En-tête modale -->
+      <header class="modal-header">
+        <h2 id="admin-modal-title" class="modal-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          Administration – PNSA
+        </h2>
+        <button id="btn-close-admin" class="icon-btn icon-btn--light" aria-label="Fermer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </header>
 
-        <!-- Onglets Admin -->
-        <nav class="admin-tabs" role="tablist" aria-label="Sections d'administration">
-          <button class="admin-tab active" role="tab" aria-selected="true" data-tab="tab-list" aria-controls="tab-panel-list">
-            Liste
-          </button>
-          <button class="admin-tab" role="tab" aria-selected="false" data-tab="tab-add" aria-controls="tab-panel-add">
-            + Ajouter
-          </button>
-        </nav>
+      <!-- Onglets Admin -->
+      <nav class="admin-tabs" role="tablist" aria-label="Sections d'administration">
+        <button class="admin-tab active" role="tab" aria-selected="true" data-tab="tab-list"
+          aria-controls="tab-panel-list">
+          Liste
+        </button>
+        <button class="admin-tab" role="tab" aria-selected="false" data-tab="tab-add" aria-controls="tab-panel-add">
+          + Ajouter
+        </button>
+      </nav>
 
-        <!-- Contenu onglets -->
-        <div class="admin-content">
+      <!-- Contenu onglets -->
+      <div class="admin-content">
 
-          <!-- Onglet : Liste des structures -->
-          <div id="tab-panel-list" role="tabpanel" class="tab-panel active">
-            <div class="admin-search-bar" style="display: flex; gap: 10px;">
-              <input type="search" id="admin-search" placeholder="Rechercher une structure…" aria-label="Rechercher dans la liste" style="flex: 1;" />
-              <button id="btn-export-csv" class="btn-secondary" title="Exporter en CSV" style="padding: 6px 12px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export CSV
+        <!-- Onglet : Liste des structures -->
+        <div id="tab-panel-list" role="tabpanel" class="tab-panel active">
+          <div class="admin-search-bar" style="display: flex; gap: 10px;">
+            <input type="search" id="admin-search" placeholder="Rechercher une structure…"
+              aria-label="Rechercher dans la liste" style="flex: 1;" />
+            <button id="btn-export-csv" class="btn-secondary" title="Exporter en CSV" style="padding: 6px 12px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export CSV
+            </button>
+          </div>
+          <div id="admin-list" class="admin-list">
+            <!-- Peuplé dynamiquement par main.js -->
+            <p class="admin-empty">Chargement…</p>
+          </div>
+        </div>
+
+        <!-- Onglet : Formulaire Ajout / Édition -->
+        <div id="tab-panel-add" role="tabpanel" class="tab-panel">
+          <form id="admin-form" class="admin-form" novalidate>
+            <input type="hidden" id="form-id" name="id" />
+
+            <h3 id="admin-form-title" class="form-section-title">Nouvelle structure</h3>
+
+            <!-- Informations générales -->
+            <fieldset class="form-fieldset">
+              <legend>Informations générales</legend>
+              <div class="form-grid">
+                <div class="form-field form-field--full">
+                  <label for="form-cover">Photo de couverture</label>
+                  <input type="file" id="form-cover" name="cover_image" accept="image/*" />
+                </div>
+                <div class="form-field">
+                  <label for="form-name">Nom de la structure <span class="required">*</span></label>
+                  <input type="text" id="form-name" name="name" required placeholder="Ex: CEICA Nzanza" />
+                </div>
+                <div class="form-field">
+                  <label for="form-type">Type de structure <span class="required">*</span></label>
+                  <select id="form-type" name="structure_type" required>
+                    <option value="">-- Sélectionner --</option>
+                    <option value="Pharmacie">Pharmacie</option>
+                    <option value="Établissement de soin">Établissement de soin</option>
+                    <option value="Centre d'Écoute et de Conseil">Centre d'Écoute et de Conseil</option>
+                    <option value="Centre de jeunes">Centre de jeunes</option>
+                  </select>
+                </div>
+                <div class="form-field" id="field-healthcare-detail" hidden>
+                  <label for="form-healthcare-detail">Précision (si Établissement)</label>
+                  <select id="form-healthcare-detail" name="healthcare_detail">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="cs">Centre de Santé (CS)</option>
+                    <option value="hgr">Hôpital Général de Référence (HGR)</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="form-city">Ville <span class="required">*</span></label>
+                  <input type="text" id="form-city" name="city" required placeholder="Ex: kinshasa" />
+                </div>
+                <div class="form-field">
+                  <label for="form-zone">Zone de Santé</label>
+                  <input type="text" id="form-zone" name="health_zone" placeholder="Ex: limete" />
+                </div>
+                <div class="form-field form-field--full">
+                  <label for="form-adresse">Adresse</label>
+                  <input type="text" id="form-adresse" name="adresse_structure"
+                    placeholder="Ex: Avenue de la Paix, N°12" />
+                </div>
+                <div class="form-field">
+                  <label for="form-contact">Contact téléphonique</label>
+                  <input type="tel" id="form-contact" name="contact_tel_structure" placeholder="Ex: 081XXXXXXX" />
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Coordonnées GPS -->
+            <fieldset class="form-fieldset">
+              <legend>Coordonnées GPS <span class="required">*</span></legend>
+              <div class="form-grid">
+                <div class="form-field form-field--full">
+                  <button type="button" id="btn-gps-select" class="btn-secondary" style="width: fit-content;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    Sélectionner sur la carte
+                  </button>
+                </div>
+                <div class="form-field">
+                  <label for="form-lat">Latitude <span class="required">*</span></label>
+                  <input type="number" id="form-lat" name="latitude" step="any" required placeholder="-4.3359" />
+                  <span class="field-error"></span>
+                </div>
+                <div class="form-field">
+                  <label for="form-lng">Longitude <span class="required">*</span></label>
+                  <input type="number" id="form-lng" name="longitude" step="any" required placeholder="15.2699" />
+                  <span class="field-error"></span>
+                </div>
+                <div class="form-field">
+                  <label for="form-gps-precision">Précision GPS (m)</label>
+                  <input type="number" id="form-gps-precision" name="gps_precision" min="1" placeholder="5" />
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Services et Caractéristiques -->
+            <fieldset class="form-fieldset">
+              <legend>Services & Caractéristiques</legend>
+              <div class="form-checkboxes">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="form-ssaaj" name="integration_ssaaj" value="1" />
+                  <span class="checkmark"></span>Intégré au SSAAJ
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="form-espace-jeune" name="espace_jeune_fonctionnel" value="1" />
+                  <span class="checkmark"></span>Espace Jeune fonctionnel
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="form-offre-contraception" name="offre_contraception" value="1" />
+                  <span class="checkmark"></span>Offre contraception
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="form-integration-pf" name="integration_pf_pharmacie" value="1" />
+                  <span class="checkmark"></span>Intégration PF (Pharmacie)
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="form-precision-adresse" name="precision_adresse_structure" value="1" />
+                  <span class="checkmark"></span>Adresse précise
+                </label>
+              </div>
+            </fieldset>
+
+            <!-- Gestion des stocks -->
+            <fieldset class="form-fieldset" id="fieldset-stocks">
+              <legend>Stocks contraceptifs disponibles</legend>
+              <div id="stocks-container" class="stocks-container">
+                <!-- Peuplé dynamiquement -->
+              </div>
+            </fieldset>
+
+            <!-- Orientation en cas de rupture -->
+            <fieldset class="form-fieldset">
+              <legend>Orientation en cas de rupture de stock</legend>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="form-orientation">Structure d'orientation</label>
+                  <input type="text" id="form-orientation" name="orientation_rupture_stocks"
+                    placeholder="Ex: Centre des jeunes" />
+                </div>
+                <div class="form-field">
+                  <label for="form-adresse-orientation">Adresse de la structure</label>
+                  <input type="text" id="form-adresse-orientation" name="adresse_struct_orientation"
+                    placeholder="Ex: Avenue X" />
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Actions formulaire -->
+            <div class="form-actions">
+              <button type="button" id="btn-cancel-form" class="btn-secondary">Annuler</button>
+              <button type="submit" id="btn-submit-form" class="btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span id="btn-submit-label">Enregistrer</span>
               </button>
             </div>
-            <div id="admin-list" class="admin-list">
-              <!-- Peuplé dynamiquement par main.js -->
-              <p class="admin-empty">Chargement…</p>
-            </div>
-          </div>
 
-          <!-- Onglet : Formulaire Ajout / Édition -->
-          <div id="tab-panel-add" role="tabpanel" class="tab-panel">
-            <form id="admin-form" class="admin-form" novalidate>
-              <input type="hidden" id="form-id" name="id" />
+          </form>
+        </div><!-- /#tab-panel-add -->
 
-              <h3 id="admin-form-title" class="form-section-title">Nouvelle structure</h3>
+      </div><!-- /.admin-content -->
 
-              <!-- Informations générales -->
-              <fieldset class="form-fieldset">
-                <legend>Informations générales</legend>
-                <div class="form-grid">
-                  <div class="form-field form-field--full">
-                    <label for="form-cover">Photo de couverture</label>
-                    <input type="file" id="form-cover" name="cover_image" accept="image/*" />
-                  </div>
-                  <div class="form-field">
-                    <label for="form-name">Nom de la structure <span class="required">*</span></label>
-                    <input type="text" id="form-name" name="name" required placeholder="Ex: CEICA Nzanza" />
-                  </div>
-                  <div class="form-field">
-                    <label for="form-type">Type de structure <span class="required">*</span></label>
-                    <select id="form-type" name="structure_type" required>
-                      <option value="">-- Sélectionner --</option>
-                      <option value="Pharmacie">Pharmacie</option>
-                      <option value="Établissement de soin">Établissement de soin</option>
-                      <option value="Centre d'Écoute et de Conseil">Centre d'Écoute et de Conseil</option>
-                      <option value="Centre de jeunes">Centre de jeunes</option>
-                    </select>
-                  </div>
-                  <div class="form-field" id="field-healthcare-detail" hidden>
-                    <label for="form-healthcare-detail">Précision (si Établissement)</label>
-                    <select id="form-healthcare-detail" name="healthcare_detail">
-                      <option value="">-- Sélectionner --</option>
-                      <option value="cs">Centre de Santé (CS)</option>
-                      <option value="hgr">Hôpital Général de Référence (HGR)</option>
-                    </select>
-                  </div>
-                  <div class="form-field">
-                    <label for="form-city">Ville <span class="required">*</span></label>
-                    <input type="text" id="form-city" name="city" required placeholder="Ex: kinshasa" />
-                  </div>
-                  <div class="form-field">
-                    <label for="form-zone">Zone de Santé</label>
-                    <input type="text" id="form-zone" name="health_zone" placeholder="Ex: limete" />
-                  </div>
-                  <div class="form-field form-field--full">
-                    <label for="form-adresse">Adresse</label>
-                    <input type="text" id="form-adresse" name="adresse_structure" placeholder="Ex: Avenue de la Paix, N°12" />
-                  </div>
-                  <div class="form-field">
-                    <label for="form-contact">Contact téléphonique</label>
-                    <input type="tel" id="form-contact" name="contact_tel_structure" placeholder="Ex: 081XXXXXXX" />
-                  </div>
-                </div>
-              </fieldset>
-
-              <!-- Coordonnées GPS -->
-              <fieldset class="form-fieldset">
-                <legend>Coordonnées GPS <span class="required">*</span></legend>
-                <div class="form-grid">
-                  <div class="form-field form-field--full">
-                    <button type="button" id="btn-gps-select" class="btn-secondary" style="width: fit-content;">
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-                      Sélectionner sur la carte
-                    </button>
-                  </div>
-                  <div class="form-field">
-                    <label for="form-lat">Latitude <span class="required">*</span></label>
-                    <input type="number" id="form-lat" name="latitude" step="any" required placeholder="-4.3359" />
-                    <span class="field-error"></span>
-                  </div>
-                  <div class="form-field">
-                    <label for="form-lng">Longitude <span class="required">*</span></label>
-                    <input type="number" id="form-lng" name="longitude" step="any" required placeholder="15.2699" />
-                    <span class="field-error"></span>
-                  </div>
-                  <div class="form-field">
-                    <label for="form-gps-precision">Précision GPS (m)</label>
-                    <input type="number" id="form-gps-precision" name="gps_precision" min="1" placeholder="5" />
-                  </div>
-                </div>
-              </fieldset>
-
-              <!-- Services et Caractéristiques -->
-              <fieldset class="form-fieldset">
-                <legend>Services & Caractéristiques</legend>
-                <div class="form-checkboxes">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="form-ssaaj" name="integration_ssaaj" value="1" />
-                    <span class="checkmark"></span>Intégré au SSAAJ
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="form-espace-jeune" name="espace_jeune_fonctionnel" value="1" />
-                    <span class="checkmark"></span>Espace Jeune fonctionnel
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="form-offre-contraception" name="offre_contraception" value="1" />
-                    <span class="checkmark"></span>Offre contraception
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="form-integration-pf" name="integration_pf_pharmacie" value="1" />
-                    <span class="checkmark"></span>Intégration PF (Pharmacie)
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="form-precision-adresse" name="precision_adresse_structure" value="1" />
-                    <span class="checkmark"></span>Adresse précise
-                  </label>
-                </div>
-              </fieldset>
-
-              <!-- Gestion des stocks -->
-              <fieldset class="form-fieldset" id="fieldset-stocks">
-                <legend>Stocks contraceptifs disponibles</legend>
-                <div id="stocks-container" class="stocks-container">
-                  <!-- Peuplé dynamiquement -->
-                </div>
-              </fieldset>
-
-              <!-- Orientation en cas de rupture -->
-              <fieldset class="form-fieldset">
-                <legend>Orientation en cas de rupture de stock</legend>
-                <div class="form-grid">
-                  <div class="form-field">
-                    <label for="form-orientation">Structure d'orientation</label>
-                    <input type="text" id="form-orientation" name="orientation_rupture_stocks" placeholder="Ex: Centre des jeunes" />
-                  </div>
-                  <div class="form-field">
-                    <label for="form-adresse-orientation">Adresse de la structure</label>
-                    <input type="text" id="form-adresse-orientation" name="adresse_struct_orientation" placeholder="Ex: Avenue X" />
-                  </div>
-                </div>
-              </fieldset>
-
-              <!-- Actions formulaire -->
-              <div class="form-actions">
-                <button type="button" id="btn-cancel-form" class="btn-secondary">Annuler</button>
-                <button type="submit" id="btn-submit-form" class="btn-primary">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span id="btn-submit-label">Enregistrer</span>
-                </button>
-              </div>
-
-            </form>
-          </div><!-- /#tab-panel-add -->
-
-        </div><!-- /.admin-content -->
-
-      </div><!-- /.modal-panel -->
-    </div><!-- /#admin-modal -->
+    </div><!-- /.modal-panel -->
+  </div><!-- /#admin-modal -->
 
 
-    <!-- ============================================================
+  <!-- ============================================================
          MODALE DE CONFIRMATION (Suppression)
     ============================================================ -->
-    <div id="confirm-modal" class="modal-overlay modal-overlay--sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" hidden>
-      <div class="modal-panel modal-panel--sm">
-        <div class="confirm-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <h2 id="confirm-title">Confirmer la suppression</h2>
-        <p id="confirm-message">Cette action est irréversible. Voulez-vous vraiment supprimer cette structure ?</p>
-        <div class="confirm-actions">
-          <button id="btn-confirm-cancel" class="btn-secondary">Annuler</button>
-          <button id="btn-confirm-delete" class="btn-danger">Supprimer définitivement</button>
-        </div>
+  <div id="confirm-modal" class="modal-overlay modal-overlay--sm" role="alertdialog" aria-modal="true"
+    aria-labelledby="confirm-title" hidden>
+    <div class="modal-panel modal-panel--sm">
+      <div class="confirm-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+      <h2 id="confirm-title">Confirmer la suppression</h2>
+      <p id="confirm-message">Cette action est irréversible. Voulez-vous vraiment supprimer cette structure ?</p>
+      <div class="confirm-actions">
+        <button id="btn-confirm-cancel" class="btn-secondary">Annuler</button>
+        <button id="btn-confirm-delete" class="btn-danger">Supprimer définitivement</button>
       </div>
     </div>
+  </div>
 
-    <!-- Overlay mobile (fermeture sidebar au clic extérieur) -->
-    <div id="sidebar-overlay"></div>
+  <!-- Overlay mobile (fermeture sidebar au clic extérieur) -->
+  <div id="sidebar-overlay"></div>
 
-    <!-- Toast notifications -->
-    <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+  <!-- Toast notifications -->
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
-    <!-- App JS (module) -->
-    <script type="module" src="/src/main.js"></script>
+  <!-- App JS (module) -->
+  <script type="module" src="/src/main.js"></script>
 
-  </body>
+</body>
+
 </html>
