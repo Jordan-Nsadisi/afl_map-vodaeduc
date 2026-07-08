@@ -642,11 +642,28 @@ html, body {
   background: var(--c-surface);
   transition: border-color var(--trans), box-shadow var(--trans);
 }
-.form-field input:focus, .form-field select:focus {
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
   outline: none; border-color: var(--c-primary);
   box-shadow: 0 0 0 3px rgba(0,135,90,.12);
 }
+.form-field input.is-invalid, .form-field select.is-invalid {
+  border-color: var(--c-danger);
+  background: var(--c-danger-l);
+}
+.form-field input.is-invalid:focus, .form-field select.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(222,53,11,.15);
+}
+.field-error {
+  font-size: 11px;
+  color: var(--c-danger);
+  margin-top: 2px;
+}
 .required { color: var(--c-danger); }
+
+/* Curseur cible pour la carte */
+.leaflet-container.crosshair-cursor-enabled {
+  cursor: crosshair !important;
+}
 
 .form-checkboxes { display: flex; flex-wrap: wrap; gap: 6px; }
 
