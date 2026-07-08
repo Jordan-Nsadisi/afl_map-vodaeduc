@@ -8,6 +8,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import './style.css'
 import L from 'leaflet'
 import 'leaflet.markercluster'
+import { fetchStructures, createStructure, updateStructure, deleteStructure } from './apiService.js'
 
 // ── CONFIG ──────────────────────────────────────────────────────
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
@@ -149,7 +150,8 @@ async function loadStructures() {
   try {
     const res = await fetch(API_URL)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    allStructures = await res.json()
+    // allStructures = await res.json()
+    allStructures = await fetchStructures()
     populateSelectFilters()
     restoreFilters()
     applyFilters()
@@ -778,10 +780,11 @@ async function handleFormSubmit(e) {
       })
 
   try {
-    const method = 'POST'
-    const url = editingId ? `${API_URL}?id=${editingId}&_method=PUT` : API_URL
-    const res = await fetch(url, { method, body: fd })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (editingId) {
+      await updateStructure(editingId, fd);
+    } else {
+      await createStructure(fd);
+    }
     showToast(editingId ? 'Structure mise à jour ✓' : 'Structure ajoutée ✓', 'success')
     await loadStructures()
     if (editingId) renderAdminList()
@@ -855,8 +858,7 @@ function openConfirmDelete(id) {
 async function confirmDelete() {
   if (!pendingDeleteId) return
   try {
-    const res = await fetch(`${API_URL}?id=${pendingDeleteId}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    await deleteStructure(pendingDeleteId);
     showToast('Structure supprimée.', 'warn')
     await loadStructures()
     renderAdminList()
