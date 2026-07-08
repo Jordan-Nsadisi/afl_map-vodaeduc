@@ -39,6 +39,8 @@ let markersLayer = null
 let map = null
 let pendingDeleteId = null
 let editingId = null
+let isAdminAuthenticated = false
+let isSelectingGps = false
 
 // ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -525,9 +527,36 @@ function bindUIEvents() {
     document.getElementById('sidebar-overlay').classList.remove('visible')
   }
 
-  // Admin modal
+  // Admin modal & PIN
   document.getElementById('btn-open-admin')?.addEventListener('click', openAdminModal)
   document.getElementById('btn-close-admin')?.addEventListener('click', closeAdminModal)
+  
+  document.getElementById('pin-form')?.addEventListener('submit', e => {
+    e.preventDefault()
+    const pin = document.getElementById('admin-pin').value
+    const correctPin = import.meta.env.VITE_ADMIN_PIN || '1234'
+    if (pin === correctPin) {
+      isAdminAuthenticated = true
+      document.getElementById('pin-modal').hidden = true
+      document.getElementById('admin-pin').value = ''
+      document.getElementById('pin-error').hidden = true
+      openAdminModal()
+    } else {
+      document.getElementById('pin-error').hidden = false
+    }
+  })
+  
+  document.getElementById('btn-close-pin')?.addEventListener('click', () => {
+    document.getElementById('pin-modal').hidden = true
+    document.getElementById('admin-pin').value = ''
+    document.getElementById('pin-error').hidden = true
+  })
+
+  // Export CSV
+  document.getElementById('btn-export-csv')?.addEventListener('click', exportCSV)
+
+  // Sélection GPS
+  document.getElementById('btn-gps-select')?.addEventListener('click', startGpsSelection)
 
   // Admin tabs
   document.querySelectorAll('.admin-tab').forEach(tab => {
@@ -566,8 +595,12 @@ function bindUIEvents() {
 
 // ── ADMIN MODAL ───────────────────────────────────────────────────
 function openAdminModal() {
-  document.getElementById('admin-modal').hidden = false
-  renderAdminList()
+  if (!isAdminAuthenticated) {
+    document.getElementById('pin-modal').hidden = false
+  } else {
+    document.getElementById('admin-modal').hidden = false
+    renderAdminList()
+  }
 }
 function closeAdminModal() {
   document.getElementById('admin-modal').hidden = true
@@ -664,37 +697,125 @@ function resetForm() {
 async function handleFormSubmit(e) {
   e.preventDefault()
   const form = e.target
-  const fd   = new FormData(form)
-  const payload = Object.fromEntries(fd.entries())
+  
+  // Custom Validation
+  let isValid = true
+  form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'))
+  form.querySelectorAll('.field-error').forEach(el => el.textContent = '')
+
+  const name = document.getElementById('form-name').value
+  if (!name.trim()) { isValid = false; document.getElementById('form-name').classList.add('is-invalid') }
+  
+  const type = document.getElementById('form-type').value
+  if (!type) { isValid = false; document.getElementById('form-type').classList.add('is-invalid') }
+  
+  const latStr = document.getElementById('form-lat').value
+  const lngStr = document.getElementById('form-lng').value
+  const lat = parseFloat(latStr)
+  const lng = parseFloat(lngStr)
+  
+  if (isNaN(lat) || lat < -15 || lat > 6) { // RDC rough bounds
+    isValid = false;
+    document.getElementById('form-lat').classList.add('is-invalid')
+    document.getElementById('form-lat').nextElementSibling.textContent = "Lat invalide (RDC)"
+  }
+  if (isNaN(lng) || lng < 12 || lng > 32) {
+    isValid = false;
+    document.getElementById('form-lng').classList.add('is-invalid')
+    document.getElementById('form-lng').nextElementSibling.textContent = "Lng invalide (RDC)"
+  }
+
+  if (!isValid) {
+    showToast("Veuillez corriger les erreurs du formulaire.", "error")
+    return
+  }
+
+  const fd = new FormData(form)
 
   // Construire stocks depuis checkboxes
-  payload.stocks = CONTRACEPTIVE_SLUGS
+  const stocks = CONTRACEPTIVE_SLUGS
     .filter(s => form.querySelector(`.form-stock-check[data-slug="${s.slug}"]`)?.checked)
     .map(s => ({
       slug: s.slug, name: s.name,
       type: form.querySelector(`.stock-type-select[data-slug="${s.slug}"]`)?.value || 'communautaire'
     }))
+    
+  fd.append('stocks', JSON.stringify(stocks))
 
   // Booleans
   ;['integration_ssaaj','espace_jeune_fonctionnel','offre_contraception','integration_pf_pharmacie','precision_adresse_structure']
-    .forEach(k => payload[k] = !!form.querySelector(`[name="${k}"]`)?.checked)
-
-  payload.latitude  = parseFloat(payload.latitude)
-  payload.longitude = parseFloat(payload.longitude)
+    .forEach(k => {
+      if (form.querySelector(`[name="${k}"]`)?.checked) {
+        fd.set(k, '1')
+      } else {
+        fd.append(k, '0') // Ensure it exists
+      }
+    })
 
   try {
-    const method = editingId ? 'PUT' : 'POST'
-    const url    = editingId ? `${API_URL}?id=${editingId}` : API_URL
-    const res    = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    const method = 'POST'
+    const url    = editingId ? `${API_URL}?id=${editingId}&_method=PUT` : API_URL
+    const res    = await fetch(url, { method, body: fd })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     showToast(editingId ? 'Structure mise à jour ✓' : 'Structure ajoutée ✓', 'success')
     await loadStructures()
-    renderAdminList()
+    if (editingId) renderAdminList()
     resetForm()
   } catch (err) {
     showToast('Erreur lors de l\'enregistrement.', 'error')
     console.error(err)
   }
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────────────
+function exportCSV() {
+  if (!allStructures.length) {
+    showToast("Aucune donnée à exporter.", "warn")
+    return
+  }
+  
+  const headers = ['id', 'name', 'structure_type', 'city', 'health_zone', 'latitude', 'longitude', 'contact_tel_structure', 'adresse_structure']
+  let csvContent = headers.join(',') + '\n'
+  
+  allStructures.forEach(s => {
+    const row = headers.map(h => {
+      let val = s[h] || ''
+      if (typeof val === 'string') val = `"${val.replace(/"/g, '""')}"`
+      return val
+    })
+    csvContent += row.join(',') + '\n'
+  })
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.setAttribute("href", url)
+  link.setAttribute("download", "structures_pnsa.csv")
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+// ── SELECTION GPS ─────────────────────────────────────────────────
+function startGpsSelection() {
+  isSelectingGps = true
+  document.getElementById('admin-modal').hidden = true
+  document.querySelector('.leaflet-container').classList.add('crosshair-cursor-enabled')
+  showToast("Cliquez sur la carte pour définir l'emplacement", "warn")
+  
+  map.once('click', e => {
+    isSelectingGps = false
+    document.querySelector('.leaflet-container').classList.remove('crosshair-cursor-enabled')
+    document.getElementById('form-lat').value = e.latlng.lat.toFixed(6)
+    document.getElementById('form-lng').value = e.latlng.lng.toFixed(6)
+    document.getElementById('admin-modal').hidden = false
+    
+    // Supprimer les classes d'erreur s'il y en a
+    document.getElementById('form-lat').classList.remove('is-invalid')
+    document.getElementById('form-lng').classList.remove('is-invalid')
+    document.getElementById('form-lat').nextElementSibling.textContent = ""
+    document.getElementById('form-lng').nextElementSibling.textContent = ""
+  })
 }
 
 // ── DELETE ────────────────────────────────────────────────────────
