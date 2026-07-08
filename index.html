@@ -189,8 +189,34 @@
 
 
     <!-- ============================================================
+         MODALE PIN ADMIN
+    ============================================================ -->
+    <div id="pin-modal" class="modal-overlay modal-overlay--sm" role="dialog" aria-modal="true" aria-labelledby="pin-modal-title" hidden>
+      <div class="modal-panel modal-panel--sm">
+        <div class="modal-header">
+          <h2 id="pin-modal-title" class="modal-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Accès restreint
+          </h2>
+          <button id="btn-close-pin" class="icon-btn icon-btn--light" aria-label="Fermer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <form id="pin-form" class="admin-form" style="padding: 24px;">
+          <div class="form-field">
+            <label for="admin-pin">Code PIN Administrateur</label>
+            <input type="password" id="admin-pin" required placeholder="Saisissez le code" />
+            <span id="pin-error" class="field-error" hidden>Code incorrect.</span>
+          </div>
+          <div class="form-actions" style="margin-top: 16px;">
+            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Valider</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================================
          MODALE ADMIN : Gestion CRUD (cachée par défaut)
-         Accessible uniquement via un code PIN ou rôle gestionnaire
     ============================================================ -->
     <div id="admin-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title" hidden>
       <div class="modal-panel">
@@ -221,8 +247,12 @@
 
           <!-- Onglet : Liste des structures -->
           <div id="tab-panel-list" role="tabpanel" class="tab-panel active">
-            <div class="admin-search-bar">
-              <input type="search" id="admin-search" placeholder="Rechercher une structure…" aria-label="Rechercher dans la liste" />
+            <div class="admin-search-bar" style="display: flex; gap: 10px;">
+              <input type="search" id="admin-search" placeholder="Rechercher une structure…" aria-label="Rechercher dans la liste" style="flex: 1;" />
+              <button id="btn-export-csv" class="btn-secondary" title="Exporter en CSV" style="padding: 6px 12px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
             </div>
             <div id="admin-list" class="admin-list">
               <!-- Peuplé dynamiquement par main.js -->
@@ -241,6 +271,10 @@
               <fieldset class="form-fieldset">
                 <legend>Informations générales</legend>
                 <div class="form-grid">
+                  <div class="form-field form-field--full">
+                    <label for="form-cover">Photo de couverture</label>
+                    <input type="file" id="form-cover" name="cover_image" accept="image/*" />
+                  </div>
                   <div class="form-field">
                     <label for="form-name">Nom de la structure <span class="required">*</span></label>
                     <input type="text" id="form-name" name="name" required placeholder="Ex: CEICA Nzanza" />
@@ -286,13 +320,21 @@
               <fieldset class="form-fieldset">
                 <legend>Coordonnées GPS <span class="required">*</span></legend>
                 <div class="form-grid">
-                  <div class="form-field">
-                    <label for="form-lat">Latitude</label>
-                    <input type="number" id="form-lat" name="latitude" step="any" required placeholder="-4.3359" />
+                  <div class="form-field form-field--full">
+                    <button type="button" id="btn-gps-select" class="btn-secondary" style="width: fit-content;">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                      Sélectionner sur la carte
+                    </button>
                   </div>
                   <div class="form-field">
-                    <label for="form-lng">Longitude</label>
+                    <label for="form-lat">Latitude <span class="required">*</span></label>
+                    <input type="number" id="form-lat" name="latitude" step="any" required placeholder="-4.3359" />
+                    <span class="field-error"></span>
+                  </div>
+                  <div class="form-field">
+                    <label for="form-lng">Longitude <span class="required">*</span></label>
                     <input type="number" id="form-lng" name="longitude" step="any" required placeholder="15.2699" />
+                    <span class="field-error"></span>
                   </div>
                   <div class="form-field">
                     <label for="form-gps-precision">Précision GPS (m)</label>
