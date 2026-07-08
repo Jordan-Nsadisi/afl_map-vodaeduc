@@ -3,8 +3,11 @@
  * Point d'entrée Vite (Vanilla JS)
  */
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import './style.css'
 import L from 'leaflet'
+import 'leaflet.markercluster'
 
 // ── CONFIG ──────────────────────────────────────────────────────
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
@@ -46,13 +49,82 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 
 // ── MAP INIT ─────────────────────────────────────────────────────
+let baseMaps = {}
+let userMarker = null
+
 function initMap() {
   map = L.map('map', { zoomControl: true }).setView([-4.322, 15.322], 12)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  
+  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
     maxZoom: 19,
+  })
+  
+  const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 19,
+  })
+
+  osm.addTo(map)
+  
+  baseMaps = {
+    "Plan (OSM)": osm,
+    "Satellite": satellite
+  }
+  
+  L.control.layers(baseMaps).addTo(map)
+
+  // Utilisation de MarkerClusterGroup
+  markersLayer = L.markerClusterGroup({
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    maxClusterRadius: 50
   }).addTo(map)
-  markersLayer = L.layerGroup().addTo(map)
+  
+  // Contrôle custom Géolocalisation
+  const locateControl = L.control({position: 'topleft'})
+  locateControl.onAdd = function() {
+    const btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom map-locate-btn')
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'
+    btn.title = 'Me localiser'
+    btn.onclick = function(e) {
+      e.stopPropagation()
+      locateUser()
+    }
+    return btn
+  }
+  locateControl.addTo(map)
+}
+
+function locateUser() {
+  if (!navigator.geolocation) {
+    showToast("La géolocalisation n'est pas supportée par votre navigateur.", "error")
+    return
+  }
+  
+  showToast("Recherche de votre position...", "success")
+  
+  navigator.geolocation.getCurrentPosition(position => {
+    const lat = position.coords.latitude
+    const lng = position.coords.longitude
+    
+    if (userMarker) {
+      userMarker.setLatLng([lat, lng])
+    } else {
+      userMarker = L.circleMarker([lat, lng], {
+        radius: 8,
+        fillColor: "#0065FF",
+        color: "#fff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map).bindPopup("Votre position")
+    }
+    map.flyTo([lat, lng], 14)
+  }, () => {
+    showToast("Impossible de récupérer votre position.", "error")
+  })
 }
 
 // ── LOAD DATA ────────────────────────────────────────────────────
@@ -164,6 +236,14 @@ function applyFilters() {
   renderMarkers()
   updateResultCount()
   toggleNoResults()
+  
+  // Ajustement automatique de la vue (Fit Bounds)
+  if (filteredStructures.length > 0) {
+    const bounds = markersLayer.getBounds()
+    if (bounds && bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 })
+    }
+  }
 }
 
 // ── MARKERS ───────────────────────────────────────────────────────
