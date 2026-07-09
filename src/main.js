@@ -374,7 +374,11 @@ function renderMarkers() {
     })
 
     const marker = L.marker([s.latitude, s.longitude], { icon })
-      .bindPopup(() => buildPopupHtml(s), { maxWidth: 270 })
+
+    marker.on('click', (e) => {
+      L.DomEvent.stopPropagation(e) // Empêche Leaflet de propager le clic à la carte
+      openPlaceDrawer(s)
+    })
 
     marker.addTo(markersLayer)
   })
@@ -630,6 +634,18 @@ function bindUIEvents() {
   })
   document.getElementById('btn-close-sidebar')?.addEventListener('click', closeSidebar)
   document.getElementById('sidebar-overlay')?.addEventListener('click', closeSidebar)
+
+  // Fermeture manuelle du Drawer via son bouton "X"
+  document.getElementById('btn-close-drawer')?.addEventListener('click', closePlaceDrawer)
+
+  // Expérience fluide : Si on clique sur la carte, on ferme le Drawer de détails
+  map.on('click', closePlaceDrawer)
+
+  // Si on clique sur "Réinitialiser" les filtres, on cache aussi le Drawer ouvert
+  document.getElementById('btn-reset-filters').addEventListener('click', () => {
+    resetFilters()
+    closePlaceDrawer() // <-- Ajouté ici
+  })
 
   function closeSidebar() {
     sidebar.classList.remove('is-open')
@@ -970,6 +986,27 @@ function getDemoData() {
     { id: 3, name: 'Hosto', precision_adresse_structure: true, contact_tel_structure: '82555', latitude: -4.3359797, longitude: 15.2699612, gps_precision: 4, cover_url: null, adresse_structure: 'Limete 16e', integration_ssaaj: true, espace_jeune_fonctionnel: true, offre_contraception: true, integration_pf_pharmacie: false, orientation_rupture_stocks: 'Aucune', adresse_struct_orientation: 'Mmmmm', structure_type: 'Établissement de soin', health_zone: 'limete', city: 'kinshasa', healthcare_detail: 'cs', stocks: [{ slug: 'coc', name: 'Pilules Orales Combinées (Pilule classique)', type: 'communautaire' }, { slug: 'injectable', name: 'Contraceptif injectable classique', type: 'clinique' }] },
     { id: 5, name: 'TEST', precision_adresse_structure: false, contact_tel_structure: '840546250', latitude: -4.3357678, longitude: 15.2699245, gps_precision: 3, cover_url: null, adresse_structure: 'OK', integration_ssaaj: false, espace_jeune_fonctionnel: false, offre_contraception: false, integration_pf_pharmacie: false, orientation_rupture_stocks: 'Non', adresse_struct_orientation: '', structure_type: 'Centre de jeunes', health_zone: 'binza_meteo', city: 'kinshasa', healthcare_detail: null, stocks: [] },
   ]
+}
+
+// ── GESTIONNAIRE DYNAMIQUE DU DRAWER ──────────────────────────────
+function openPlaceDrawer(s) {
+  const contentContainer = document.getElementById('drawer-content')
+  const drawer = document.getElementById('place-drawer')
+
+  if (contentContainer && drawer) {
+    // 1. On recycle ta fonction existante buildPopupHtml pour injecter les données
+    contentContainer.innerHTML = buildPopupHtml(s)
+
+    // 2. On fait glisser le panneau à l'écran
+    drawer.classList.add('is-open')
+  }
+}
+
+function closePlaceDrawer() {
+  const drawer = document.getElementById('place-drawer')
+  if (drawer) {
+    drawer.classList.remove('is-open')
+  }
 }
 
 // ── UTILS / A11Y ──────────────────────────────────────────────────
