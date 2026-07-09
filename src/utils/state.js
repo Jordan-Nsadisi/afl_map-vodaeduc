@@ -1,17 +1,6 @@
 
 export const states = {
 
-    allStructures: [],
-    filteredStructures: [],
-    map: null,
-    markersLayer: null,
-    userMarker: null,
-    userCoords: null,
-    pendingDeleteId: null,
-    editingId: null,
-    isAdminAuthenticated: false,
-    isSelectingGps: false,
-
     STRUCTURE_TYPES: [
         { label: 'Pharmacie', key: 'Pharmacie', icon: '💊', markerClass: 'marker-icon--pharmacie' },
         { label: 'Établissement de soin', key: 'Établissement de soin', icon: '🏥', markerClass: 'marker-icon--soins' },

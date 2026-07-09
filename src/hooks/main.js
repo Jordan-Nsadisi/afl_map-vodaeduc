@@ -23,15 +23,6 @@ window.addEventListener('unhandledrejection', function (event) {
   console.error('[PNSA Unhandled Rejection]', event.reason);
 });
 
-const STRUCTURE_TYPES = [
-  { label: 'Pharmacie', key: 'Pharmacie', icon: '💊', markerClass: 'marker-icon--pharmacie' },
-  { label: 'Établissement de soin', key: 'Établissement de soin', icon: '🏥', markerClass: 'marker-icon--soins' },
-  { label: "Centre d'Écoute et Conseil", key: "Centre d'Écoute et de Conseil", icon: '🫂', markerClass: 'marker-icon--ecoute' },
-  { label: 'Centre de jeunes', key: 'Centre de jeunes', icon: '👥', markerClass: 'marker-icon--jeunes' },
-]
-
-const HEALTHCARE_DETAIL_LABELS = { cs: 'Centre de Santé', hgr: 'Hôpital Général de Référence' }
-
 // ── STATE ────────────────────────────────────────────────────────
 let allStructures = []
 let filteredStructures = []
@@ -183,7 +174,7 @@ async function loadStructures(lat = null, lng = null) {
 // ── BUILD FILTER UI ───────────────────────────────────────────────
 function buildFilterCheckboxes() {
   const typeList = document.getElementById('filter-type-list')
-  typeList.innerHTML = STRUCTURE_TYPES.map(t => {
+  typeList.innerHTML = states?.STRUCTURE_TYPES?.map(t => {
     let extra = '';
     if (t.key === 'Établissement de soin') {
       extra = `
@@ -324,7 +315,7 @@ function renderMarkers() {
   filteredStructures.forEach(s => {
     if (!s.latitude || !s.longitude) return
 
-    const typeConf = STRUCTURE_TYPES.find(t => t.key === s.structure_type) || { icon: '📍', markerClass: 'marker-icon--default' }
+    const typeConf = states?.STRUCTURE_TYPES?.find(t => t.key === s.structure_type) || { icon: '📍', markerClass: 'marker-icon--default' }
 
     const icon = L.divIcon({
       className: '',
@@ -346,9 +337,9 @@ function renderMarkers() {
 }
 
 function buildPopupHtml(s) {
-  const typeConf = STRUCTURE_TYPES.find(t => t.key === s.structure_type)
+  const typeConf = states?.STRUCTURE_TYPES?.find(t => t.key === s.structure_type)
   const typeIcon = typeConf ? typeConf.icon : '📍'
-  const detailLabel = s.healthcare_detail ? ` – ${HEALTHCARE_DETAIL_LABELS[s.healthcare_detail] || s.healthcare_detail}` : ''
+  const detailLabel = s.healthcare_detail ? ` – ${states?.HEALTHCARE_DETAIL_LABELS[s.healthcare_detail] || s.healthcare_detail}` : ''
   const zoneLabel = s.health_zone ? capitalize(s.health_zone.replace(/_/g, ' ')) : ''
   const cityLabel = s.city ? capitalize(s.city) : ''
 
@@ -700,7 +691,7 @@ function renderAdminList() {
   if (!allStructures.length) { list.innerHTML = '<p class="admin-empty">Aucune structure.</p>'; return }
 
   list.innerHTML = allStructures.map(s => {
-    const typeConf = STRUCTURE_TYPES.find(t => t.key === s.structure_type)
+    const typeConf = states?.STRUCTURE_TYPES?.find(t => t.key === s.structure_type)
     return `
       <div class="admin-list-item" data-id="${s.id}" data-name="${escHtml(s.name)}">
         <span class="admin-item-icon">${typeConf ? typeConf.icon : '📍'}</span>
