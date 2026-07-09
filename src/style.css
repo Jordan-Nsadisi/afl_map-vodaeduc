@@ -1413,3 +1413,26 @@ body {
 #sidebar-overlay.visible {
   display: block;
 }
+
+/* 
+#admin-modal .admin-content {
+  overflow-y: auto !important;
+}
+
+#tab-panel-add.tab-panel.active {
+  display: block !important;
+  height: auto !important;
+}
+
+.admin-form {
+  padding-bottom: 30px !important;
+}
+
+.modal-overlay,
+.admin-content {
+  overscroll-behavior: contain !important;
+}
+
+body:has(.modal-overlay:not([hidden])) #sidebar .sidebar-body {
+  overflow-y: hidden !important;
+} */
