@@ -216,7 +216,6 @@ body {
   pointer-events: none;
 }
 
-/* Checkbox list */
 .checkbox-list {
   list-style: none;
   display: flex;
@@ -326,7 +325,6 @@ body {
   color: var(--c-primary);
 }
 
-/* ── MAP CONTAINER ───────────────────────────────────────── */
 #map-container {
   flex: 1;
   position: relative;
@@ -339,7 +337,6 @@ body {
   background: #e8edf2;
 }
 
-/* ── TOPBAR (mobile + branding) ──────────────────────────── */
 #topbar {
   position: fixed;
   top: 12px;
@@ -358,7 +355,6 @@ body {
 
 .topbar-btn {
   display: none;
-  /* visible seulement en mobile */
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
@@ -411,7 +407,6 @@ body {
   display: none;
 }
 
-/* ── MAP LOADER ──────────────────────────────────────────── */
 #map-loader {
   position: absolute;
   inset: 0;
@@ -446,7 +441,6 @@ body {
   }
 }
 
-/* ── NO RESULTS ──────────────────────────────────────────── */
 .no-results-overlay {
   position: absolute;
   inset: 0;
@@ -489,7 +483,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* ── Buttons ─────────────────────────────────────────────── */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -588,7 +581,6 @@ body {
   height: 16px;
 }
 
-/* ── LEAFLET Custom Controls ───────────────────────────────── */
 .map-locate-btn {
   background-color: var(--c-surface);
   width: 32px;
@@ -613,7 +605,6 @@ body {
   height: 18px;
 }
 
-/* ── LEAFLET Popup custom ────────────────────────────────── */
 .leaflet-popup-content-wrapper {
   border-radius: var(--radius-md) !important;
   box-shadow: var(--shadow-lg) !important;
@@ -845,7 +836,6 @@ body {
   text-decoration: underline;
 }
 
-/* ── Custom Marker Icons ─────────────────────────────────── */
 .marker-icon {
   display: flex;
   align-items: center;
@@ -883,7 +873,6 @@ body {
   background: #6B778C;
 }
 
-/* ── MODAL ───────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -965,7 +954,6 @@ body {
   height: 18px;
 }
 
-/* ── Admin Tabs ──────────────────────────────────────────── */
 .admin-tabs {
   display: flex;
   border-bottom: 1px solid var(--c-border);
@@ -1018,7 +1006,6 @@ body {
   flex-direction: column;
 }
 
-/* Admin List tab */
 .admin-search-bar {
   padding: 12px 16px;
   border-bottom: 1px solid var(--c-border);
@@ -1129,7 +1116,6 @@ body {
   color: var(--c-text-sub);
 }
 
-/* Admin Form */
 .admin-form {
   padding: 16px;
   display: flex;
@@ -1225,7 +1211,6 @@ body {
   color: var(--c-danger);
 }
 
-/* Curseur cible pour la carte */
 .leaflet-container.crosshair-cursor-enabled {
   cursor: crosshair !important;
 }
@@ -1282,7 +1267,6 @@ body {
   border-top: 1px solid var(--c-border);
 }
 
-/* ── Confirm Modal ───────────────────────────────────────── */
 .modal-overlay--sm .modal-panel {
   height: auto !important;
   max-height: fit-content !important;
@@ -1308,7 +1292,6 @@ body {
   margin-top: 8px;
 }
 
-/* ── Toast ───────────────────────────────────────────────── */
 .toast-container {
   position: fixed;
   bottom: 20px;
@@ -1358,7 +1341,6 @@ body {
   }
 }
 
-/* ── Responsive Tablet & Mobile ────────────────────────────── */
 @media (max-width: 1024px) {
   #sidebar {
     position: absolute;
@@ -1380,7 +1362,6 @@ body {
 
   .topbar-btn {
     display: flex !important;
-    /* Force l'apparition du bouton Admin et Filtres sur mobile */
     pointer-events: auto;
   }
 
@@ -1420,7 +1401,6 @@ body {
   }
 }
 
-/* Sidebar overlay (mobile) */
 #sidebar-overlay {
   display: none;
   position: fixed;
@@ -1435,7 +1415,6 @@ body {
 
 .proximity-section {
   background: var(--c-primary-l) !important;
-  /* Fond vert clair pour attirer l'œil */
   border-bottom: 1px solid var(--c-border);
   padding: 14px 16px;
 }
@@ -1473,7 +1452,6 @@ body {
   border-color: var(--c-primary);
 }
 
-/* PANNEAU DE DÉTAILS (Drawer) RESPONSIVE */
 .place-drawer {
   position: fixed;
   background: var(--c-surface);
@@ -1485,64 +1463,48 @@ body {
   box-sizing: border-box;
 }
 
-/* COMPORTEMENT DESKTOP (Superposition sur la Sidebar)  */
 @media (min-width: 1025px) {
   .place-drawer {
     top: var(--topbar-h);
-    /* Aligné sous la topbar si présente, sinon mettez 0 */
     left: 0;
     width: var(--sidebar-w);
-    /* Même largeur exacte que ta sidebar */
     height: calc(100vh - var(--topbar-h));
     z-index: 1050;
-    /* S'affiche au-dessus de la sidebar et des contrôles Leaflet */
     border-right: 1px solid var(--c-border);
     transform: translateX(-100%);
-    /* Caché par défaut à gauche */
   }
 }
 
-/* COMPORTEMENT MOBILE (Volet qui monte depuis le bas) */
 @media (max-width: 1024px) {
   .place-drawer {
     bottom: 0;
     left: 0;
     width: 100%;
     max-height: 65vh;
-    /* Occupe au maximum 65% de la hauteur de l'écran */
     min-height: 40vh;
     z-index: 2000;
-    /* S'affiche par-dessus l'application mobile */
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    /* Coins arrondis en haut */
     transform: translateY(100%);
-    /* Caché par défaut en bas */
   }
 }
 
-/* ÉTAT OUVERT (Commun aux deux modes) */
 .place-drawer.is-open {
   transform: translate(0, 0) !important;
-  /* Annule le décalage pour le faire apparaître */
 }
 
-/* CONTENU INTERNE DU DRAWER */
 .drawer-content {
   flex: 1;
   overflow-y: auto;
-  /* Permet le défilement si le texte est long */
   padding: 16px;
   -webkit-overflow-scrolling: touch;
 }
 
-/* On adapte les marges de la carte interne du popup dans le drawer */
 .drawer-content .popup-card {
   box-shadow: none !important;
   margin: 0 !important;
   width: 100% !important;
 }
 
-/* BOUTON FERMER DU DRAWER  */
 .drawer-close-btn {
   position: absolute;
   top: 12px;
