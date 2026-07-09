@@ -1423,3 +1423,43 @@ body {
 #sidebar-overlay.visible {
   display: block;
 }
+
+.proximity-section {
+  background: var(--c-primary-l) !important;
+  /* Fond vert clair pour attirer l'œil */
+  border-bottom: 1px solid var(--c-border);
+  padding: 14px 16px;
+}
+
+.proximity-container {
+  padding: 4px 0 !important;
+  background: transparent !important;
+  align-items: flex-start !important;
+}
+
+.proximity-container:hover {
+  background: transparent !important;
+}
+
+.proximity-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.proximity-title {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--c-primary);
+}
+
+.proximity-desc {
+  font-size: 11px;
+  color: var(--c-text-sub);
+  margin-top: 1px;
+}
+
+.proximity-container .checkmark {
+  margin-top: 2px;
+  border-color: var(--c-primary);
+}
