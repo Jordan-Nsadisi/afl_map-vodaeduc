@@ -6,6 +6,7 @@ import '../styles/style.css'
 import L from 'leaflet'
 import 'leaflet.markercluster'
 import { fetchStructures, createStructure, updateStructure, deleteStructure } from '../services/apiService.js'
+import { states } from '../utils/state.js'
 
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
 
@@ -212,7 +213,7 @@ function buildFilterCheckboxes() {
 
   // Méthodes contraceptives
   const stockList = document.getElementById('filter-stock-list')
-  stockList.innerHTML = CONTRACEPTIVE_SLUGS.map(s => `
+  stockList.innerHTML = states?.CONTRACEPTIVE_SLUGS?.map(s => `
     <li class="checkbox-item">
       <label class="checkbox-label">
         <input type="checkbox" class="stock-filter" value="${escHtml(s.slug)}" />
@@ -224,7 +225,7 @@ function buildFilterCheckboxes() {
   // Stocks admin form
   const stocksContainer = document.getElementById('stocks-container')
   if (stocksContainer) {
-    stocksContainer.innerHTML = CONTRACEPTIVE_SLUGS.map(s => `
+    stocksContainer.innerHTML = states?.CONTRACEPTIVE_SLUGS?.map(s => `
       <label class="stock-check-item">
         <input type="checkbox" class="form-stock-check" data-slug="${s.slug}" data-name="${escHtml(s.name)}" />
         <span class="stock-check-label">${escHtml(s.name)}</span>
@@ -818,7 +819,7 @@ async function handleFormSubmit(e) {
   const fd = new FormData(form)
 
   // Construire stocks depuis checkboxes
-  const stocks = CONTRACEPTIVE_SLUGS
+  const stocks = states?.CONTRACEPTIVE_SLUGS
     .filter(s => form.querySelector(`.form-stock-check[data-slug="${s.slug}"]`)?.checked)
     .map(s => ({
       slug: s.slug, name: s.name,
