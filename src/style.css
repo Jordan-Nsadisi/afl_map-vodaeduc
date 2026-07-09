@@ -1,11 +1,15 @@
 :root {
-  --c-primary: #F96000;
-  --c-primary-d: #C24B00;
-  --c-primary-l: #FFF0E6;
+  --c-primary: #2D5B96;
+  --c-primary-d: #1F426E;
+  --c-primary-l: #EAF0F7;
 
-  --c-accent: #E60000;
-  --c-accent-d: #B30000;
-  --c-accent-l: #FDEBEB;
+  --c-accent: #D93574;
+  --c-accent-d: #B01E53;
+  --c-accent-l: #FDF0F5;
+
+  --c-warning: #E89744;
+  --c-warning-d: #C77A2B;
+  --c-warning-l: #FDF5EC;
 
   --c-danger: #DE350B;
   --c-danger-l: #FFEBE6;
@@ -37,15 +41,21 @@
     --c-text: #f9fafb;
     --c-text-sub: #9ca3af;
     --c-border: #374151;
-    --c-primary: #FF7315;
-    --c-primary-d: #F96000;
-    --c-primary-l: rgba(255, 115, 21, 0.15);
+
+    --c-primary: #4A7CB5;
+    --c-primary-d: #2D5B96;
+    --c-primary-l: rgba(45, 91, 150, 0.15);
+
+    --c-accent: #E55B93;
+    --c-accent-d: #D93574;
+    --c-accent-l: rgba(217, 53, 116, 0.15);
+
+    --c-warning: #F0A95E;
+    --c-warning-d: #E89744;
+    --c-warning-l: rgba(232, 151, 68, 0.15);
+
     --c-danger: #ef4444;
     --c-danger-l: rgba(239, 68, 68, 0.15);
-
-    /* ── ROUGE VODACOM EN MODE SOMBRE (Ajusté pour le contraste) ── */
-    --c-accent: #FF4D4D;
-    --c-accent-l: rgba(230, 0, 0, 0.2);
   }
 }
 
