@@ -1562,6 +1562,7 @@ body {
 }
 
 .drawer-close-btn:hover {
-  background: var(--c-primary-l);
-  color: var(--c-primary);
+  background: var(--c-border) !important;
+  color: var(--c-accent);
+  border-color: var(--c-text-sub);
 }
