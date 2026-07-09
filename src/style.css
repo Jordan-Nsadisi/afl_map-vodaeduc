@@ -3,20 +3,14 @@
    Contrainte iframe Moodle : 100vw × 100vh, overflow hidden
 ============================================================ */
 
-/* ── Tokens ─────────────────────────────────────────────── */
 :root {
-  /* ── PALETTE ORANGE UNFPA ────────────────────────────────────── */
   --c-primary: #F96000;
   --c-primary-d: #C24B00;
   --c-primary-l: #FFF0E6;
 
-  /* ── NOUVELLE PALETTE ROUGE VODACOM (Calculée) ────────────────── */
   --c-accent: #E60000;
-  /* Le rouge officiel Vodacom */
   --c-accent-d: #B30000;
-  /* Variante sombre pour les hovers sur les éléments rouges */
   --c-accent-l: #FDEBEB;
-  /* Teinte pastel rouge très douce pour les fonds alternatifs */
 
   --c-danger: #DE350B;
   --c-danger-l: #FFEBE6;
@@ -56,12 +50,10 @@
 
     /* ── ROUGE VODACOM EN MODE SOMBRE (Ajusté pour le contraste) ── */
     --c-accent: #FF4D4D;
-    /* Rouge légèrement adouci pour ne pas agresser les yeux sur fond noir */
     --c-accent-l: rgba(230, 0, 0, 0.2);
   }
 }
 
-/* ── Reset ───────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -83,7 +75,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── App Shell ───────────────────────────────────────────── */
 #app-shell {
   display: flex;
   width: 100vw;
@@ -92,7 +83,6 @@ body {
   position: relative;
 }
 
-/* ── SIDEBAR ─────────────────────────────────────────────── */
 #sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
