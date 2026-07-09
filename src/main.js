@@ -1,7 +1,4 @@
-/**
- * Vodaeduc PNSA – main.js
- * Point d'entrée Vite (Vanilla JS)
- */
+
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
@@ -10,13 +7,11 @@ import L from 'leaflet'
 import 'leaflet.markercluster'
 import { fetchStructures, createStructure, updateStructure, deleteStructure } from './apiService.js'
 
-// ── CONFIG ──────────────────────────────────────────────────────
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
 
 // Monitoring basique des erreurs globales
 window.onerror = function (message, source, lineno, colno, error) {
   console.error('[PNSA Error Monitoring]', { message, source, lineno, colno, error });
-  // S'assurer que le DOM est prêt avant d'afficher un toast
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     if (typeof showToast === 'function') {
       showToast('Une erreur inattendue est survenue.', 'error');
@@ -66,22 +61,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const proximityCheckbox = document.getElementById('filter-proximity')
 
-  // Si l'interrupteur est coché par défaut, on lance la détection GPS automatique
   if (proximityCheckbox && proximityCheckbox.checked) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          // Succès GPS : On mémorise et on charge le rayon de 1km
           userCoords = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           }
-          // On place le petit cercle bleu sur la carte
           drawUserMarker(userCoords.lat, userCoords.lng)
           await loadStructures(userCoords.lat, userCoords.lng)
         },
         async () => {
-          // Échec ou Refus GPS : On décoche la case et on charge tout le monde par défaut
           showToast("Position introuvable ou refusée. Chargement général.", "warn")
           proximityCheckbox.checked = false
           await loadStructures()
@@ -92,7 +83,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       await loadStructures()
     }
   } else {
-    // Si l'interrupteur n'était pas coché, comportement d'origine
     await loadStructures()
   }
 })
@@ -171,23 +161,6 @@ function locateUser() {
 
   showToast("Recherche de votre position...", "success")
 
-  // navigator.geolocation.getCurrentPosition(position => {
-  //   const lat = position.coords.latitude
-  //   const lng = position.coords.longitude
-
-  //   if (userMarker) {
-  //     userMarker.setLatLng([lat, lng])
-  //   } else {
-  //     userMarker = L.circleMarker([lat, lng], {
-  //       radius: 8,
-  //       fillColor: "#0065FF",
-  //       color: "#fff",
-  //       weight: 2,
-  //       opacity: 1,
-  //       fillOpacity: 0.8
-  //     }).addTo(map).bindPopup("Votre position")
-  //   }
-  //   map.flyTo([lat, lng], 14)
   navigator.geolocation.getCurrentPosition(position => {
     // On met à jour l'état global en cas de clic manuel sur la cible
     userCoords = { lat: position.coords.latitude, lng: position.coords.longitude }
@@ -201,7 +174,6 @@ function locateUser() {
 async function loadStructures(lat = null, lng = null) {
   showLoader(true)
   try {
-    // On relaie les variables de géolocalisation vers apiService
     allStructures = await fetchStructures(lat, lng)
     populateSelectFilters()
     restoreFilters()
@@ -220,7 +192,6 @@ async function loadStructures(lat = null, lng = null) {
 
 // ── BUILD FILTER UI ───────────────────────────────────────────────
 function buildFilterCheckboxes() {
-  // Types de structures
   const typeList = document.getElementById('filter-type-list')
   typeList.innerHTML = STRUCTURE_TYPES.map(t => {
     let extra = '';
@@ -376,7 +347,7 @@ function renderMarkers() {
     const marker = L.marker([s.latitude, s.longitude], { icon })
 
     marker.on('click', (e) => {
-      L.DomEvent.stopPropagation(e) // Empêche Leaflet de propager le clic à la carte
+      L.DomEvent.stopPropagation(e)
       openPlaceDrawer(s)
     })
 
@@ -577,10 +548,9 @@ function bindUIEvents() {
   })
   document.getElementById('filter-zone').addEventListener('change', applyFilters)
 
-  // ⚡ AJOUT : Gestion de l'interrupteur "Autour de moi (1 km)"
+  // interrupteur "Autour de moi (1 km)"
   document.getElementById('filter-proximity')?.addEventListener('change', async (e) => {
     if (e.target.checked) {
-      // Si l'utilisateur coche la case et qu'on a déjà ses coordonnées GPS
       if (userCoords) {
         drawUserMarker(userCoords.lat, userCoords.lng)
         await loadStructures(userCoords.lat, userCoords.lng)
@@ -606,7 +576,6 @@ function bindUIEvents() {
         }
       }
     } else {
-      // Si l'utilisateur décoche la case, on recharge la totalité de la base de données
       await loadStructures()
     }
   })
@@ -635,16 +604,12 @@ function bindUIEvents() {
   document.getElementById('btn-close-sidebar')?.addEventListener('click', closeSidebar)
   document.getElementById('sidebar-overlay')?.addEventListener('click', closeSidebar)
 
-  // Fermeture manuelle du Drawer via son bouton "X"
   document.getElementById('btn-close-drawer')?.addEventListener('click', closePlaceDrawer)
 
-  // Expérience fluide : Si on clique sur la carte, on ferme le Drawer de détails
   map.on('click', closePlaceDrawer)
-
-  // Si on clique sur "Réinitialiser" les filtres, on cache aussi le Drawer ouvert
   document.getElementById('btn-reset-filters').addEventListener('click', () => {
     resetFilters()
-    closePlaceDrawer() // <-- Ajouté ici
+    closePlaceDrawer()
   })
 
   function closeSidebar() {
@@ -652,7 +617,6 @@ function bindUIEvents() {
     document.getElementById('sidebar-overlay').classList.remove('visible')
   }
 
-  // Admin modal & PIN
   document.getElementById('btn-open-admin')?.addEventListener('click', openAdminModal)
   document.getElementById('btn-open-admin-pc')?.addEventListener('click', openAdminModal)
   document.getElementById('btn-close-admin')?.addEventListener('click', closeAdminModal)
@@ -703,7 +667,6 @@ function bindUIEvents() {
     field.hidden = e.target.value !== 'Établissement de soin'
   })
 
-  // Admin search debounce
   let searchTimeout;
   document.getElementById('admin-search')?.addEventListener('input', e => {
     clearTimeout(searchTimeout)
@@ -766,7 +729,6 @@ function renderAdminList() {
       </div>`
   }).join('')
 
-  // Délégation d'événements
   list.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.dataset.action === 'edit') openEditForm(parseInt(btn.dataset.id))
@@ -833,7 +795,6 @@ async function handleFormSubmit(e) {
   e.preventDefault()
   const form = e.target
 
-  // Custom Validation
   let isValid = true
   form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'))
   form.querySelectorAll('.field-error').forEach(el => el.textContent = '')
@@ -849,7 +810,7 @@ async function handleFormSubmit(e) {
   const lat = parseFloat(latStr)
   const lng = parseFloat(lngStr)
 
-  if (isNaN(lat) || lat < -15 || lat > 6) { // RDC rough bounds
+  if (isNaN(lat) || lat < -15 || lat > 6) {
     isValid = false;
     document.getElementById('form-lat').classList.add('is-invalid')
     document.getElementById('form-lat').nextElementSibling.textContent = "Lat invalide (RDC)"
@@ -877,13 +838,12 @@ async function handleFormSubmit(e) {
 
   fd.append('stocks', JSON.stringify(stocks))
 
-    // Booleans
     ;['integration_ssaaj', 'espace_jeune_fonctionnel', 'offre_contraception', 'integration_pf_pharmacie', 'precision_adresse_structure']
       .forEach(k => {
         if (form.querySelector(`[name="${k}"]`)?.checked) {
           fd.set(k, '1')
         } else {
-          fd.append(k, '0') // Ensure it exists
+          fd.append(k, '0')
         }
       })
 
@@ -954,7 +914,6 @@ function startGpsSelection() {
   })
 }
 
-// ── DELETE ────────────────────────────────────────────────────────
 function openConfirmDelete(id) {
   pendingDeleteId = id
   const s = allStructures.find(x => x.id === id)
@@ -979,7 +938,7 @@ async function confirmDelete() {
   }
 }
 
-// ── DEMO DATA (fallback si API indisponible) ──────────────────────
+// fallback demodata 
 function getDemoData() {
   return [
     { id: 4, name: 'CEICA', precision_adresse_structure: false, contact_tel_structure: '813542456', latitude: -4.3359148, longitude: 15.2698697, gps_precision: 5, cover_url: null, adresse_structure: 'Nzanza', integration_ssaaj: true, espace_jeune_fonctionnel: false, offre_contraception: true, integration_pf_pharmacie: false, orientation_rupture_stocks: 'Centre des jeunes', adresse_struct_orientation: '', structure_type: "Centre d'Écoute et de Conseil", health_zone: '', city: 'boma', healthcare_detail: null, stocks: [{ slug: 'presartif_masc', name: 'Préservatifs masculins', type: 'communautaire' }, { slug: 'presartif_fem', name: 'Préservatifs féminins', type: 'communautaire' }] },
@@ -994,10 +953,8 @@ function openPlaceDrawer(s) {
   const drawer = document.getElementById('place-drawer')
 
   if (contentContainer && drawer) {
-    // 1. On recycle ta fonction existante buildPopupHtml pour injecter les données
     contentContainer.innerHTML = buildPopupHtml(s)
 
-    // 2. On fait glisser le panneau à l'écran
     drawer.classList.add('is-open')
   }
 }
