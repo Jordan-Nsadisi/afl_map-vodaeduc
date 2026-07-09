@@ -9,7 +9,7 @@ import { fetchStructures, createStructure, updateStructure, deleteStructure } fr
 
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
 
-// Monitoring basique des erreurs globales
+// Monitoring des erreurs globales
 window.onerror = function (message, source, lineno, colno, error) {
   console.error('[PNSA Error Monitoring]', { message, source, lineno, colno, error });
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
