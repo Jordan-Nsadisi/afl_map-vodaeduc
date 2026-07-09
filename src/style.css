@@ -223,8 +223,6 @@ body {
   gap: 6px;
 }
 
-.checkbox-item {}
-
 .checkbox-label {
   display: flex;
   align-items: center;
