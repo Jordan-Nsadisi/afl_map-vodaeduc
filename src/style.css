@@ -5,10 +5,19 @@
 
 /* ── Tokens ─────────────────────────────────────────────── */
 :root {
-  --c-primary: #00875A;
-  --c-primary-d: #006644;
-  --c-primary-l: #E3FCEF;
-  --c-accent: #FFAB00;
+  /* ── PALETTE ORANGE UNFPA ────────────────────────────────────── */
+  --c-primary: #F96000;
+  --c-primary-d: #C24B00;
+  --c-primary-l: #FFF0E6;
+
+  /* ── NOUVELLE PALETTE ROUGE VODACOM (Calculée) ────────────────── */
+  --c-accent: #E60000;
+  /* Le rouge officiel Vodacom */
+  --c-accent-d: #B30000;
+  /* Variante sombre pour les hovers sur les éléments rouges */
+  --c-accent-l: #FDEBEB;
+  /* Teinte pastel rouge très douce pour les fonds alternatifs */
+
   --c-danger: #DE350B;
   --c-danger-l: #FFEBE6;
 
@@ -39,12 +48,16 @@
     --c-text: #f9fafb;
     --c-text-sub: #9ca3af;
     --c-border: #374151;
-    --c-primary: #00A36C;
-    --c-primary-d: #00875A;
-    --c-primary-l: rgba(0, 163, 108, 0.15);
+    --c-primary: #FF7315;
+    --c-primary-d: #F96000;
+    --c-primary-l: rgba(255, 115, 21, 0.15);
     --c-danger: #ef4444;
     --c-danger-l: rgba(239, 68, 68, 0.15);
-    --c-accent: #3b82f6;
+
+    /* ── ROUGE VODACOM EN MODE SOMBRE (Ajusté pour le contraste) ── */
+    --c-accent: #FF4D4D;
+    /* Rouge légèrement adouci pour ne pas agresser les yeux sur fond noir */
+    --c-accent-l: rgba(230, 0, 0, 0.2);
   }
 }
 
