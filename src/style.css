@@ -1471,3 +1471,97 @@ body {
   margin-top: 2px;
   border-color: var(--c-primary);
 }
+
+/* PANNEAU DE DÉTAILS (Drawer) RESPONSIVE */
+.place-drawer {
+  position: fixed;
+  background: var(--c-surface);
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--trans);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* COMPORTEMENT DESKTOP (Superposition sur la Sidebar)  */
+@media (min-width: 1025px) {
+  .place-drawer {
+    top: var(--topbar-h);
+    /* Aligné sous la topbar si présente, sinon mettez 0 */
+    left: 0;
+    width: var(--sidebar-w);
+    /* Même largeur exacte que ta sidebar */
+    height: calc(100vh - var(--topbar-h));
+    z-index: 1050;
+    /* S'affiche au-dessus de la sidebar et des contrôles Leaflet */
+    border-right: 1px solid var(--c-border);
+    transform: translateX(-100%);
+    /* Caché par défaut à gauche */
+  }
+}
+
+/* COMPORTEMENT MOBILE (Volet qui monte depuis le bas) */
+@media (max-width: 1024px) {
+  .place-drawer {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 65vh;
+    /* Occupe au maximum 65% de la hauteur de l'écran */
+    min-height: 40vh;
+    z-index: 2000;
+    /* S'affiche par-dessus l'application mobile */
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    /* Coins arrondis en haut */
+    transform: translateY(100%);
+    /* Caché par défaut en bas */
+  }
+}
+
+/* ÉTAT OUVERT (Commun aux deux modes) */
+.place-drawer.is-open {
+  transform: translate(0, 0) !important;
+  /* Annule le décalage pour le faire apparaître */
+}
+
+/* CONTENU INTERNE DU DRAWER */
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  /* Permet le défilement si le texte est long */
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* On adapte les marges de la carte interne du popup dans le drawer */
+.drawer-content .popup-card {
+  box-shadow: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* BOUTON FERMER DU DRAWER  */
+.drawer-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--trans), color var(--trans);
+}
+
+.drawer-close-btn:hover {
+  background: var(--c-primary-l);
+  color: var(--c-primary);
+}
