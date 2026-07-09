@@ -29,17 +29,6 @@ const STRUCTURE_TYPES = [
   { label: 'Centre de jeunes', key: 'Centre de jeunes', icon: '👥', markerClass: 'marker-icon--jeunes' },
 ]
 
-const CONTRACEPTIVE_SLUGS = [
-  { slug: 'presartif_masc', name: 'Préservatifs masculins' },
-  { slug: 'presartif_fem', name: 'Préservatifs féminins' },
-  { slug: 'coc', name: 'Pilules Orales Combinées' },
-  { slug: 'injectable', name: 'Contraceptif injectable' },
-  { slug: 'implant', name: 'Implant' },
-  { slug: 'diu', name: 'DIU (Stérilet)' },
-  { slug: 'patch', name: 'Patch contraceptif' },
-  { slug: 'coc_urgence', name: 'Pilule du lendemain' },
-]
-
 const HEALTHCARE_DETAIL_LABELS = { cs: 'Centre de Santé', hgr: 'Hôpital Général de Référence' }
 
 // ── STATE ────────────────────────────────────────────────────────
