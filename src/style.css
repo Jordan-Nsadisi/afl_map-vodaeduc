@@ -1275,6 +1275,8 @@ body {
 
 /* ── Confirm Modal ───────────────────────────────────────── */
 .modal-overlay--sm .modal-panel {
+  height: auto !important;
+  max-height: fit-content !important;
   padding: 32px 24px;
   text-align: center;
   gap: 12px;
