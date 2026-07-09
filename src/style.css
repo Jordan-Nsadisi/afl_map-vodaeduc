@@ -60,7 +60,8 @@
 html,
 body {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
+  position: fixed;
   overflow: hidden;
   font-family: var(--font);
   font-size: 14px;
@@ -73,7 +74,7 @@ body {
 #app-shell {
   display: flex;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -885,6 +886,7 @@ body {
   padding: 16px;
   backdrop-filter: blur(3px);
   animation: fadeIn .15s ease;
+  overflow: hidden;
 }
 
 .modal-overlay[hidden] {
@@ -907,7 +909,8 @@ body {
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 700px;
-  max-height: 90vh;
+  height: 90vh;
+  max-height: 90dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -988,12 +991,17 @@ body {
 .admin-content {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .tab-panel {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   height: 100%;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .tab-panel.active {
@@ -1413,26 +1421,3 @@ body {
 #sidebar-overlay.visible {
   display: block;
 }
-
-/* 
-#admin-modal .admin-content {
-  overflow-y: auto !important;
-}
-
-#tab-panel-add.tab-panel.active {
-  display: block !important;
-  height: auto !important;
-}
-
-.admin-form {
-  padding-bottom: 30px !important;
-}
-
-.modal-overlay,
-.admin-content {
-  overscroll-behavior: contain !important;
-}
-
-body:has(.modal-overlay:not([hidden])) #sidebar .sidebar-body {
-  overflow-y: hidden !important;
-} */
