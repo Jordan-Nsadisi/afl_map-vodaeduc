@@ -153,7 +153,7 @@ function drawUserMarker(lat, lng) {
   } else {
     userMarker = L.circleMarker([lat, lng], {
       radius: 8,
-      fillColor: "#0065FF",
+      fillColor: "#E60000",
       color: "#fff",
       weight: 2,
       opacity: 1,
