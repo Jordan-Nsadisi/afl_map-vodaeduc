@@ -341,10 +341,11 @@ body {
 
 /* ── TOPBAR (mobile + branding) ──────────────────────────── */
 #topbar {
-  position: absolute;
+  position: fixed;
   top: 12px;
   left: 12px;
-  z-index: 400;
+  right: 12px;
+  z-index: 1100;
   display: flex;
   align-items: center;
   gap: 8px;
