@@ -8,31 +8,24 @@
     content="Carte interactive PNSA - Localisez les structures de santé pour jeunes en RDC : pharmacies, centres de santé, hôpitaux et centres d'écoute." />
   <title>Vodaeduc PNSA – Cartographie des structures de santé</title>
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
-  <!-- Google Fonts : Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- App CSS -->
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 
 <body>
 
-  <!-- ============================================================
-         LAYOUT PRINCIPAL : Sidebar + Carte
-         Occupe exactement 100vw × 100vh (contrainte iframe Moodle)
-    ============================================================ -->
+  <!-- LAYOUT PRINCIPAL : Sidebar + Carte -->
   <div id="app-shell">
 
-    <!-- ── SIDEBAR : Filtres ────────────────────────────────────── -->
+    <!-- SIDEBAR : Filtres -->
     <aside id="sidebar" aria-label="Filtres de recherche">
 
-      <!-- En-tête Sidebar -->
       <header class="sidebar-header">
         <div class="sidebar-logo">
           <span class="logo-badge">PNSA</span>
@@ -41,7 +34,7 @@
             <p class="sidebar-subtitle">Carte Santé</p>
           </div>
         </div>
-        <!-- Bouton pour fermer la sidebar sur mobile -->
+
         <button id="btn-close-sidebar" class="icon-btn" aria-label="Fermer les filtres" title="Fermer">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -52,8 +45,6 @@
 
       <!-- Corps scrollable des filtres -->
       <div class="sidebar-body">
-
-        <!-- fiktre par rayon 1km -->
         <section class="filter-group proximity-section">
           <label class="checkbox-label proximity-container">
             <input type="checkbox" id="filter-proximity" checked />
@@ -65,7 +56,6 @@
           </label>
         </section>
 
-        <!-- Filtre : Ville -->
         <section class="filter-group" aria-labelledby="filter-city-label">
           <h2 id="filter-city-label" class="filter-label">
             <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -77,7 +67,6 @@
           <div class="select-wrapper">
             <select id="filter-city" aria-label="Filtrer par ville">
               <option value="">Toutes les villes</option>
-              <!-- Peuplé dynamiquement par main.js -->
             </select>
             <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="6 9 12 15 18 9" />
@@ -85,7 +74,6 @@
           </div>
         </section>
 
-        <!-- Filtre : Zone de Santé -->
         <section class="filter-group" aria-labelledby="filter-zone-label">
           <h2 id="filter-zone-label" class="filter-label">
             <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -97,7 +85,6 @@
           <div class="select-wrapper">
             <select id="filter-zone" aria-label="Filtrer par zone de santé">
               <option value="">Toutes les zones</option>
-              <!-- Peuplé dynamiquement par main.js -->
             </select>
             <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="6 9 12 15 18 9" />
@@ -105,7 +92,6 @@
           </div>
         </section>
 
-        <!-- Filtre : Type de structure -->
         <section class="filter-group" aria-labelledby="filter-type-label">
           <h2 id="filter-type-label" class="filter-label">
             <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -115,11 +101,9 @@
             Type de structure
           </h2>
           <ul id="filter-type-list" class="checkbox-list" role="group" aria-labelledby="filter-type-label">
-            <!-- Items injectés dynamiquement par main.js -->
           </ul>
         </section>
 
-        <!-- Filtre : Méthodes contraceptives -->
         <section class="filter-group" aria-labelledby="filter-stock-label">
           <h2 id="filter-stock-label" class="filter-label">
             <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -130,11 +114,9 @@
             Contraceptifs disponibles
           </h2>
           <ul id="filter-stock-list" class="checkbox-list" role="group" aria-labelledby="filter-stock-label">
-            <!-- Items injectés dynamiquement par main.js -->
           </ul>
         </section>
 
-        <!-- Filtre : Caractéristiques -->
         <section class="filter-group" aria-labelledby="filter-features-label">
           <h2 id="filter-features-label" class="filter-label">
             <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -167,10 +149,8 @@
             </li>
           </ul>
         </section>
+      </div>
 
-      </div><!-- /.sidebar-body -->
-
-      <!-- Pied de la sidebar : stats + reset -->
       <footer class="sidebar-footer">
         <div id="results-count" class="results-count" aria-live="polite">
           <span id="count-number" class="count-number">–</span>
@@ -190,9 +170,9 @@
         </button>
       </footer>
 
-    </aside><!-- /#sidebar -->
+    </aside>
 
-    <!-- ── zone de drawer details lieu ─────────────────── -->
+    <!-- drawer details lieu -->
     <div id="place-drawer" class="place-drawer">
       <button id="btn-close-drawer" class="drawer-close-btn" aria-label="Fermer les détails" title="Fermer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
@@ -205,10 +185,10 @@
       </div>
     </div>
 
-    <!-- ── ZONE PRINCIPALE : Carte + Contrôles ─────────────────── -->
+    <!-- ZONE PRINCIPALE : Carte + Contrôles -->
     <main id="map-container" aria-label="Carte interactive">
 
-      <!-- Barre flottante supérieure (mobile : toggle sidebar + admin) -->
+      <!-- mobile toggle  -->
       <div id="topbar">
         <button id="btn-open-sidebar" class="topbar-btn" aria-label="Ouvrir les filtres" title="Filtres">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -228,16 +208,15 @@
         </button> -->
       </div>
 
-      <!-- État de chargement initial -->
+      <!-- loader  -->
       <div id="map-loader" class="map-loader" aria-label="Chargement de la carte">
         <div class="loader-spinner"></div>
         <p>Chargement des données…</p>
       </div>
 
-      <!-- Conteneur Leaflet (ne jamais styler height/width ici, géré par CSS) -->
+      <!-- map container -->
       <div id="map" aria-label="Carte des structures de santé"></div>
 
-      <!-- Message si aucun résultat après filtrage -->
       <div id="no-results-overlay" class="no-results-overlay" hidden>
         <div class="no-results-card">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -251,14 +230,11 @@
         </div>
       </div>
 
-    </main><!-- /#map-container -->
+    </main>
 
-  </div><!-- /#app-shell -->
+  </div>
 
-
-  <!-- ============================================================
-         MODALE PIN ADMIN
-    ============================================================ -->
+  <!-- Modal pin admin  -->
   <div id="pin-modal" class="modal-overlay modal-overlay--sm" role="dialog" aria-modal="true"
     aria-labelledby="pin-modal-title" hidden>
     <div class="modal-panel modal-panel--sm">
@@ -290,14 +266,11 @@
     </div>
   </div>
 
-  <!-- ============================================================
-         MODALE ADMIN : Gestion CRUD (cachée par défaut)
-    ============================================================ -->
+  <!-- Modal admin -->
   <div id="admin-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title"
     hidden>
     <div class="modal-panel">
 
-      <!-- En-tête modale -->
       <header class="modal-header">
         <h2 id="admin-modal-title" class="modal-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -313,7 +286,6 @@
         </button>
       </header>
 
-      <!-- Onglets Admin -->
       <nav class="admin-tabs" role="tablist" aria-label="Sections d'administration">
         <button class="admin-tab active" role="tab" aria-selected="true" data-tab="tab-list"
           aria-controls="tab-panel-list">
@@ -498,17 +470,15 @@
             </div>
 
           </form>
-        </div><!-- /#tab-panel-add -->
+        </div>
 
-      </div><!-- /.admin-content -->
+      </div>
 
-    </div><!-- /.modal-panel -->
-  </div><!-- /#admin-modal -->
+    </div>
+  </div>
 
 
-  <!-- ============================================================
-         MODALE DE CONFIRMATION (Suppression)
-    ============================================================ -->
+  <!-- Modal de confirmation (suppression) -->
   <div id="confirm-modal" class="modal-overlay modal-overlay--sm" role="alertdialog" aria-modal="true"
     aria-labelledby="confirm-title" hidden>
     <div class="modal-panel modal-panel--sm">
@@ -528,13 +498,12 @@
     </div>
   </div>
 
-  <!-- Overlay mobile (fermeture sidebar au clic extérieur) -->
+  <!-- mobile overley -->
   <div id="sidebar-overlay"></div>
 
   <!-- Toast notifications -->
   <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
-  <!-- App JS (module) -->
   <script type="module" src="/src/main.js"></script>
 
 </body>
