@@ -996,7 +996,7 @@ body {
 }
 
 .tab-panel {
-  display: flex;
+  display: none !important;
   flex-direction: column;
   flex: 1;
   height: 100%;
@@ -1005,7 +1005,7 @@ body {
 }
 
 .tab-panel.active {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
 }
 
