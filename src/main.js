@@ -56,13 +56,45 @@ let pendingDeleteId = null
 let editingId = null
 let isAdminAuthenticated = false
 let isSelectingGps = false
+let userCoords = null
 
 // ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   initMap()
   buildFilterCheckboxes()
   bindUIEvents()
-  await loadStructures()
+
+  const proximityCheckbox = document.getElementById('filter-proximity')
+
+  // Si l'interrupteur est coché par défaut, on lance la détection GPS automatique
+  if (proximityCheckbox && proximityCheckbox.checked) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          // Succès GPS : On mémorise et on charge le rayon de 1km
+          userCoords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          }
+          // On place le petit cercle bleu sur la carte
+          drawUserMarker(userCoords.lat, userCoords.lng)
+          await loadStructures(userCoords.lat, userCoords.lng)
+        },
+        async () => {
+          // Échec ou Refus GPS : On décoche la case et on charge tout le monde par défaut
+          showToast("Position introuvable ou refusée. Chargement général.", "warn")
+          proximityCheckbox.checked = false
+          await loadStructures()
+        }
+      )
+    } else {
+      proximityCheckbox.checked = false
+      await loadStructures()
+    }
+  } else {
+    // Si l'interrupteur n'était pas coché, comportement d'origine
+    await loadStructures()
+  }
 })
 
 // ── MAP INIT ─────────────────────────────────────────────────────
@@ -114,6 +146,23 @@ function initMap() {
   locateControl.addTo(map)
 }
 
+// Helper pour dessiner le point bleu de l'étudiant
+function drawUserMarker(lat, lng) {
+  if (userMarker) {
+    userMarker.setLatLng([lat, lng])
+  } else {
+    userMarker = L.circleMarker([lat, lng], {
+      radius: 8,
+      fillColor: "#0065FF",
+      color: "#fff",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8
+    }).addTo(map).bindPopup("Votre position")
+  }
+  map.flyTo([lat, lng], 14)
+}
+
 function locateUser() {
   if (!navigator.geolocation) {
     showToast("La géolocalisation n'est pas supportée par votre navigateur.", "error")
@@ -122,43 +171,44 @@ function locateUser() {
 
   showToast("Recherche de votre position...", "success")
 
-  navigator.geolocation.getCurrentPosition(position => {
-    const lat = position.coords.latitude
-    const lng = position.coords.longitude
+  // navigator.geolocation.getCurrentPosition(position => {
+  //   const lat = position.coords.latitude
+  //   const lng = position.coords.longitude
 
-    if (userMarker) {
-      userMarker.setLatLng([lat, lng])
-    } else {
-      userMarker = L.circleMarker([lat, lng], {
-        radius: 8,
-        fillColor: "#0065FF",
-        color: "#fff",
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).addTo(map).bindPopup("Votre position")
-    }
-    map.flyTo([lat, lng], 14)
+  //   if (userMarker) {
+  //     userMarker.setLatLng([lat, lng])
+  //   } else {
+  //     userMarker = L.circleMarker([lat, lng], {
+  //       radius: 8,
+  //       fillColor: "#0065FF",
+  //       color: "#fff",
+  //       weight: 2,
+  //       opacity: 1,
+  //       fillOpacity: 0.8
+  //     }).addTo(map).bindPopup("Votre position")
+  //   }
+  //   map.flyTo([lat, lng], 14)
+  navigator.geolocation.getCurrentPosition(position => {
+    // On met à jour l'état global en cas de clic manuel sur la cible
+    userCoords = { lat: position.coords.latitude, lng: position.coords.longitude }
+    drawUserMarker(userCoords.lat, userCoords.lng)
   }, () => {
     showToast("Impossible de récupérer votre position.", "error")
   })
 }
 
 // ── LOAD DATA ────────────────────────────────────────────────────
-async function loadStructures() {
+async function loadStructures(lat = null, lng = null) {
   showLoader(true)
   try {
-    const res = await fetch(API_URL)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    // allStructures = await res.json()
-    allStructures = await fetchStructures()
+    // On relaie les variables de géolocalisation vers apiService
+    allStructures = await fetchStructures(lat, lng)
     populateSelectFilters()
     restoreFilters()
     applyFilters()
   } catch (err) {
     console.error('Erreur API:', err)
-    showToast('Impossible de charger les données. Vérifiez que l\'API est démarrée.', 'error')
-    // Données de démonstration
+    showToast('Impossible de charger les données dynamiques.', 'error')
     allStructures = getDemoData()
     populateSelectFilters()
     restoreFilters()
@@ -488,11 +538,15 @@ function resetFilters() {
   populateSelectFilters()
   document.getElementById('filter-zone').value = ''
 
+  const proximity = document.getElementById('filter-proximity')
+  if (proximity) proximity.checked = false
+
   document.querySelectorAll('.type-filter, .stock-filter, .feature-filter, .hc-detail-filter').forEach(el => { el.checked = false })
 
   const sub = document.getElementById('subfilter-healthcare')
   if (sub) sub.style.display = 'none'
 
+  loadStructures()
   applyFilters()
 }
 
@@ -514,6 +568,47 @@ function bindUIEvents() {
     applyFilters()
   })
   document.getElementById('filter-zone').addEventListener('change', applyFilters)
+
+  // Filtres d'origine
+  document.getElementById('filter-city').addEventListener('change', () => {
+    populateSelectFilters()
+    applyFilters()
+  })
+  document.getElementById('filter-zone').addEventListener('change', applyFilters)
+
+  // ⚡ AJOUT : Gestion de l'interrupteur "Autour de moi (1 km)"
+  document.getElementById('filter-proximity')?.addEventListener('change', async (e) => {
+    if (e.target.checked) {
+      // Si l'utilisateur coche la case et qu'on a déjà ses coordonnées GPS
+      if (userCoords) {
+        drawUserMarker(userCoords.lat, userCoords.lng)
+        await loadStructures(userCoords.lat, userCoords.lng)
+      } else {
+        // Si les coordonnées n'existent pas encore, on appelle le GPS
+        if (navigator.geolocation) {
+          showToast("Recherche de votre position...", "success")
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              userCoords = { lat: position.coords.latitude, lng: position.coords.longitude }
+              drawUserMarker(userCoords.lat, userCoords.lng)
+              await loadStructures(userCoords.lat, userCoords.lng)
+            },
+            async () => {
+              showToast("Impossible d'accéder à votre position. Filtre annulé.", "error")
+              e.target.checked = false // Décoche la case en cas d'échec
+              await loadStructures()
+            }
+          )
+        } else {
+          e.target.checked = false
+          await loadStructures()
+        }
+      }
+    } else {
+      // Si l'utilisateur décoche la case, on recharge la totalité de la base de données
+      await loadStructures()
+    }
+  })
 
   document.addEventListener('change', e => {
     if (e.target.matches('.type-filter[value="Établissement de soin"]')) {

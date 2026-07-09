@@ -8,8 +8,15 @@ const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php';
 /**
  * Récupère toutes les structures (GET)
  */
-export async function fetchStructures() {
-    const response = await fetch(API_URL);
+export async function fetchStructures(lat = null, lng = null) {
+    let url = API_URL;
+
+    // Si la géo-localisation est fournie, on construit la Query String
+    if (lat !== null && lng !== null) {
+        url += `?user_lat=${lat}&user_lng=${lng}`;
+    }
+
+    const response = await fetch(url);
     if (!response.ok) throw new Error(`Erreur lors de la récupération (HTTP ${response.status})`);
     return await response.json();
 }
