@@ -2,10 +2,10 @@
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import './style.css'
+import '../style.css'
 import L from 'leaflet'
 import 'leaflet.markercluster'
-import { fetchStructures, createStructure, updateStructure, deleteStructure } from '../apiService.js'
+import { fetchStructures, createStructure, updateStructure, deleteStructure } from '../services/apiService.js'
 
 const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
 
