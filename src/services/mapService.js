@@ -11,10 +11,13 @@ export function initMap() {
         }
     );
 
-    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri',
-        maxZoom: 19,
-    })
+    const satellite = L.tileLayer(
+        import.meta.env.VITE_MAP_SATELLITE_URL,
+        {
+            attribution: import.meta.env.VITE_MAP_SATELLITE_ATTRIBUTION,
+            maxZoom: Number(import.meta.env.VITE_MAP_SATELLITE_MAX_ZOOM),
+        }
+    );
 
     osm.addTo(map)
 
