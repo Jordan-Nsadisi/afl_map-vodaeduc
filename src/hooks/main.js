@@ -8,8 +8,6 @@ import 'leaflet.markercluster'
 import { fetchStructures, createStructure, updateStructure, deleteStructure } from '../services/apiService.js'
 import { states } from '../utils/state.js'
 
-const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
-
 // Monitoring des erreurs globales
 window.onerror = function (message, source, lineno, colno, error) {
   console.error('[PNSA Error Monitoring]', { message, source, lineno, colno, error });
