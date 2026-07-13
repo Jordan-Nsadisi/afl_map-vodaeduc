@@ -4,10 +4,10 @@ export function initMap() {
     map = L.map('map', { zoomControl: true }).setView([-4.322, 15.322], 12)
 
     const osm = L.tileLayer(
-        import.meta.env.VITE_MAP_TILE_URL || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        import.meta.env.VITE_MAP_TILE_URL,
         {
-            attribution: import.meta.env.VITE_MAP_ATTRIBUTION || '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: Number(import.meta.env.VITE_MAP_MAX_ZOOM) || 19,
+            attribution: import.meta.env.VITE_MAP_ATTRIBUTION,
+            maxZoom: Number(import.meta.env.VITE_MAP_MAX_ZOOM),
         }
     );
 
