@@ -8,8 +8,6 @@ import 'leaflet.markercluster'
 import { fetchStructures, createStructure, updateStructure, deleteStructure } from '../services/apiService.js'
 import { states } from '../utils/state.js'
 
-const API_URL = 'http://localhost:8000/vodaeduc_pnsa_api.php'
-
 // Monitoring des erreurs globales
 window.onerror = function (message, source, lineno, colno, error) {
   console.error('[PNSA Error Monitoring]', { message, source, lineno, colno, error });
@@ -75,15 +73,21 @@ let userMarker = null
 function initMap() {
   map = L.map('map', { zoomControl: true }).setView([-4.322, 15.322], 12)
 
-  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-    maxZoom: 19,
-  })
+  const osm = L.tileLayer(
+    import.meta.env.VITE_MAP_TILE_URL,
+    {
+      attribution: import.meta.env.VITE_MAP_ATTRIBUTION,
+      maxZoom: Number(import.meta.env.VITE_MAP_MAX_ZOOM),
+    }
+  );
 
-  const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri',
-    maxZoom: 19,
-  })
+  const satellite = L.tileLayer(
+    import.meta.env.VITE_MAP_SATELLITE_URL,
+    {
+      attribution: import.meta.env.VITE_MAP_SATELLITE_ATTRIBUTION,
+      maxZoom: Number(import.meta.env.VITE_MAP_SATELLITE_MAX_ZOOM),
+    }
+  );
 
   osm.addTo(map)
 
